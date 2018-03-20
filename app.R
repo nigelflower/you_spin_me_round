@@ -6,8 +6,10 @@ ui <- dashboardPage(
     
     dashboardSidebar(
         sidebarMenu(
-            menuItem("About", tabName = "About", icon = icon("address-card")
-            )
+            menuItem("About", tabName = "About"),
+            menuItem("Tornadoes", tabName="Tornadoes"),
+            menuItem("Damages", tabName="Damages"),
+            menuItem("Illinois", tabName="Illinois")
         )
     ),
     
@@ -25,8 +27,16 @@ ui <- dashboardPage(
                   included the following libraries:")
             ),
             
-            tabItem(tabName=""
+            tabItem(tabName="Tornadoes"
             
+                    
+            ),
+            
+            tabItem(tabName="Damages"
+            
+            ),
+            
+            tabItem(tabName="Illinois"
                     
             )
         )
