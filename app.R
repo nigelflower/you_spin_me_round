@@ -21,10 +21,6 @@ ui <- dashboardPage(
                     h4(style = "font-size: 150%",a(href = "https://sites.google.com/uic.edu/nishimo1/cs424/project03", "Project Website")),
                     h2(style = "font-size: 200%","CS 424: Visualization and Visual Analytics"),
                     h4(style = "font-size: 150%",a(href = "https://www.evl.uic.edu/aej/424/", "Course website"))
-                    #h3(style = "font-size: 200%","Using this Application:"),
-                    #h4(style = "font-size: 150%","This project was a group effort between Dania Azhari, 
-                  #Nigel Flower, Jason Guo, and Ryan Nishimoto. This application 
-                 # included the following libraries:")
             ),
             
             tabItem(tabName="Tornadoes"
