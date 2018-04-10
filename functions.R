@@ -43,7 +43,10 @@ getTornadoCountsHour <- function(tornadoes){
 # for a given distance range from Chicago summed over all years
 
 getTornadoCountsDistance <- function(tornadoes, lowerBound, upperBound){
-    
+    filtered_tornadoes <- subset(tornadoes, len > lowerBound & len < upperBound)
+    table(filtered_tornadoes$yr)
+    table(filtered_tornadoes$yr, filtered_tornadoes$mag)
+    t(apply(table(filtered_tornadoes$yr, filtered_tornadoes$mag), 1, function(i) i / sum(i)))
 }
 
 # 5.) table and chart showing the injuries, fatalities, loss for each year in 
