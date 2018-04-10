@@ -5,7 +5,7 @@ library(shinydashboard)
 
 
 tornadoes <- read.csv("tornadoes.csv")
-
+magnitudes <-c("-9", "0", "1", "2", "3", "4", "5")
 
 ui <- dashboardPage(skin="black",
     dashboardHeader(title = "You Spin me Round"),
@@ -69,18 +69,30 @@ ui <- dashboardPage(skin="black",
                                              selected=1),
                                 
                                 box(title="Tornado Magnitudes by Hour",
-                                plotOutput("hour_magnitude"), width=10)
+                                plotOutput("hour_magnitude"), width=12)
+                            ),
+                            
+                            fluidRow(
+                                box(title="Percentage of Magnitudes by Hour",
+                                    plotOutput("hour_magnitude_percentage"), width=12)
                             )
                         ),
                         
                         tabPanel(title="Distance",
                             fluidRow(
                                 box(title="Tornado Magnitude by Distance",
-                                plotOutput("distance_magnitude"), width=12),
+                                plotOutput("distance_magnitude"), width=12)
+                            ),
                             
+                            fluidRow(
+                                box(title="Percentage of Magnitudes by Distance",
+                                    plotOutput("distance_magnitude_percentage"), width=12)
+                            ),
+                            
+                            fluidRow(
                                 box(title = "Distance of Tornado in Miles",
-                                sliderInput("slider", "Number of observations:", 0, 234, c(0, 100))
-                            )
+                                    sliderInput("slider", "Number of observations:", 0, 234, c(0, 100))
+                                )
                             )
                                  
                         )
@@ -139,9 +151,8 @@ server <- function(input, output, session){
     })
     
     output$year_magnitude_percentage <- renderPlot({
-        ymgp_cols <-c("-9", "0", "1", "2", "3", "4", "5")
         year_mag_per <- data.frame(t(apply(table(tornadoes$yr, tornadoes$mag), 1, function(i) i / sum(i))))
-        colnames(year_mag_per) <- ymgp_cols
+        colnames(year_mag_per) <- magnitudes
         melted_ymp <- melt(as.matrix(year_mag_per))
         
         ggplot(data=melted_ymp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
@@ -179,6 +190,16 @@ server <- function(input, output, session){
         
     })
     
+    output$hour_magnitude_percentage <- renderPlot({
+        hour_mag_per <- data.frame(t(apply(table(hours, tornadoes$mag), 1, function(i) i / sum(i))))
+        colnames(hour_mag_per) <- magnitudes
+        melted_hmp <- melt(as.matrix(hour_mag_per))
+        
+        ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
+            xlab("Hours") + ylab("Percentage of Magnitudes") +
+            guides(fill=guide_legend(title="Magnitude"))
+    })
+    
     output$distance_magnitude <- renderPlot({
         filtered_tornadoes <- subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])
         filt_year_mag <- data.frame(table(filtered_tornadoes$yr, filtered_tornadoes$mag))
@@ -187,6 +208,17 @@ server <- function(input, output, session){
             theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
             xlab("Year") + ylab("Total Tornadoes") + 
             guides(fill=guide_legend(title="Magnitude"))
+        
+    })
+    
+    output$distance_magnitude_percentage <- renderPlot({
+        filtered_tornadoes <- subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])
+        filt_year_mag_per <- data.frame(t(apply(table(filtered_tornadoes$yr, filtered_tornadoes$mag), 1, function(i) i / sum(i))))
+        #colnames(filt_year_mag_per) <- magnitudes
+        melted_fymp <- melt(as.matrix(filt_year_mag_per))
+        
+        ggplot(data=melted_fymp, aes(x=Var1, y=value, color=factor(Var2))) + 
+            geom_line(size=3) + xlab("Year") + ylab("Percentage of Magnitudes")
         
     })
 }
