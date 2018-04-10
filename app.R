@@ -49,7 +49,11 @@ ui <- dashboardPage(skin="black",
                 
                 fluidRow(
                     box(title="Tornado Magnitude by Distance",
-                        plotOutput("distance_magnitude"), width=12)
+                        plotOutput("distance_magnitude"), width=12),
+                    
+                    box(title = "Distance of Tornado in Miles",
+                        sliderInput("slider", "Number of observations:", 0, 250, c(50, 100))
+                    )
                 )
             ),
             
@@ -97,7 +101,7 @@ server <- function(input, output, session){
     })
     
     output$distance_magnitude <- renderPlot({
-        filtered_tornadoes <- subset(tornadoes, len > 5 & len < 6)
+        filtered_tornadoes <- subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])
         filt_year_mag <- data.frame(table(filtered_tornadoes$yr, filtered_tornadoes$mag))
         
         ggplot(data=filt_year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') + 
