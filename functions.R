@@ -73,6 +73,16 @@ getTornadoCountsDistance <- function(tornadoes, lowerBound, upperBound){
     t(apply(table(filtered_tornadoes$yr, filtered_tornadoes$mag), 1, function(i) i / sum(i)))
 }
 
+filtered_tornadoes <- subset(tornadoes, len > 5 & len < 6)
+filt_year_mag <- data.frame(table(filtered_tornadoes$yr, filtered_tornadoes$mag))
+
+ggplot(data=filt_year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') + 
+    theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+    xlab("Year") + ylab("Total Earthquakes") + 
+    guides(fill=guide_legend(title="Magnitude"))
+
+
+
 # 5.) table and chart showing the injuries, fatalities, loss for each year in 
 # the records
 
