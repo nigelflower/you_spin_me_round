@@ -1,5 +1,6 @@
 
 library(ggplot2)
+library(lubridate)
 
 setwd("github/you_spin_me_round")
 
@@ -12,8 +13,8 @@ tornadoes <- read.csv("tornadoes.csv")
 # totals 
 
 getTornadoCountsYear <- function(tornadoes){
-    cbind(table(tornadoes$yr, tornadoes$mag),table(tornadoes$yr))
-    # if you need to get the percentages too:
+    table(tornadoes$yr)
+    table(tornadoes$yr, tornadoes$mag)
     t(apply(table(tornadoes$yr, tornadoes$mag), 1, function(i) i / sum(i)))
 }
 
@@ -21,7 +22,9 @@ getTornadoCountsYear <- function(tornadoes){
 # per month summed over all years
 
 getTornadoCountsMonth <- function(tornadoes){
-    
+    table(tornadoes$mo)
+    table(tornadoes$mo, tornadoes$mag)
+    t(apply(table(tornadoes$mo, tornadoes$mag), 1, function(i) i / sum(i)))
 }
 
 
@@ -29,7 +32,11 @@ getTornadoCountsMonth <- function(tornadoes){
 # per hour of the day summed over all years
 
 getTornadoCountsHour <- function(tornadoes){
-    
+    # get the hours
+    hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
+    table(hours)
+    table(hours, tornadoes$mag)
+    t(apply(table(hours, tornadoes$mag), 1, function(i) i / sum(i)))
 }
 
 # 4.) table and chart showing the total numbers (and # and % in each magnitude) 
