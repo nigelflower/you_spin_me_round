@@ -23,7 +23,7 @@ year_mag <- data.frame(table(tornadoes$yr, tornadoes$mag))
 
 ggplot(data=year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') + 
     theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
-    xlab("Year") + ylab("Total Earthquakes") + 
+    xlab("Year") + ylab("Total Tornadoes") + 
     guides(fill=guide_legend(title="Magnitude"))
 
 
@@ -40,7 +40,7 @@ mo_mag <- data.frame(table(tornadoes$mo, tornadoes$mag))
 
 ggplot(data=mo_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') +
     theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
-    xlab("Month") + ylab("Total Earthquakes") + 
+    xlab("Month") + ylab("Total Tornadoes") + 
     guides(fill=guide_legend(title="Magnitude"))
 
 
@@ -59,7 +59,7 @@ hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
 hour_mag <- data.frame(table(hours, tornadoes$mag))
 ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
     theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
-    xlab("Hour of Day") + ylab("Total Earthquakes") + 
+    xlab("Hour of Day") + ylab("Total Tornadoes") + 
     guides(fill=guide_legend(title="Magnitude"))
 
 
@@ -78,7 +78,7 @@ filt_year_mag <- data.frame(table(filtered_tornadoes$yr, filtered_tornadoes$mag)
 
 ggplot(data=filt_year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') + 
     theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
-    xlab("Year") + ylab("Total Earthquakes") + 
+    xlab("Year") + ylab("Total Tornadoes") + 
     guides(fill=guide_legend(title="Magnitude"))
 
 
