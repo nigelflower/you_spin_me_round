@@ -1,8 +1,8 @@
 library(shiny)
 library(shinydashboard)
 
-ui <- dashboardPage(
-    dashboardHeader(title = "CS 424 Project 3: You Spin me Round", titleWidth = "100%"),
+ui <- dashboardPage(skin="black",
+    dashboardHeader(title = "You Spin me Round"),
     
     dashboardSidebar(
         sidebarMenu(
@@ -23,8 +23,11 @@ ui <- dashboardPage(
                     h4(style = "font-size: 150%",a(href = "https://www.evl.uic.edu/aej/424/", "Course website"))
             ),
             
-            tabItem(tabName="Tornadoes"
-            
+            tabItem(tabName="Tornadoes",
+                
+                fluidRow(
+                    
+                )
                     
             ),
             

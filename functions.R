@@ -12,7 +12,9 @@ tornadoes <- read.csv("tornadoes.csv")
 # totals 
 
 getTornadoCountsYear <- function(tornadoes){
-    table(tornadoes$yr)
+    cbind(table(tornadoes$yr, tornadoes$mag),table(tornadoes$yr))
+    # if you need to get the percentages too:
+    t(apply(table(tornadoes$yr, tornadoes$mag), 1, function(i) i / sum(i)))
 }
 
 # 2.) table and chart showing the total numbers (and # and % in each magnitude) 
