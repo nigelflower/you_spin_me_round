@@ -1,6 +1,7 @@
 
 library(ggplot2)
 library(lubridate)
+library(plotly)
 
 setwd("github/you_spin_me_round")
 
@@ -18,6 +19,14 @@ getTornadoCountsYear <- function(tornadoes){
     t(apply(table(tornadoes$yr, tornadoes$mag), 1, function(i) i / sum(i)))
 }
 
+year_mag <- data.frame(table(tornadoes$yr, tornadoes$mag))
+
+ggplot(data=year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') + 
+    theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+    xlab("Year") + ylab("Total Earthquakes") + 
+    guides(fill=guide_legend(title="Magnitude"))
+
+
 # 2.) table and chart showing the total numbers (and # and % in each magnitude) 
 # per month summed over all years
 
@@ -26,6 +35,13 @@ getTornadoCountsMonth <- function(tornadoes){
     table(tornadoes$mo, tornadoes$mag)
     t(apply(table(tornadoes$mo, tornadoes$mag), 1, function(i) i / sum(i)))
 }
+
+mo_mag <- data.frame(table(tornadoes$mo, tornadoes$mag))
+
+ggplot(data=mo_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') +
+    theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+    xlab("Month") + ylab("Total Earthquakes") + 
+    guides(fill=guide_legend(title="Magnitude"))
 
 
 # 3.) table and chart showing the total numbers (and # and % in each magnitude) 
@@ -38,6 +54,14 @@ getTornadoCountsHour <- function(tornadoes){
     table(hours, tornadoes$mag)
     t(apply(table(hours, tornadoes$mag), 1, function(i) i / sum(i)))
 }
+
+hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
+hour_mag <- data.frame(table(hours, tornadoes$mag))
+ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
+    theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+    xlab("Hour of Day") + ylab("Total Earthquakes") + 
+    guides(fill=guide_legend(title="Magnitude"))
+
 
 # 4.) table and chart showing the total numbers (and # and % in each magnitude) 
 # for a given distance range from Chicago summed over all years
