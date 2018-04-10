@@ -41,6 +41,11 @@ ui <- dashboardPage(skin="black",
                             fluidRow(
                                 box(title="Tornado Magnitudes by Year",
                                     plotOutput("year_magnitude"), width=12)
+                            ),
+                            
+                            fluidRow(
+                                box(title="Percentage of Magnitudes by Year",
+                                    plotOutput("year_magnitude_percentage"), width=12)
                             )
                         ),
 
@@ -48,13 +53,23 @@ ui <- dashboardPage(skin="black",
                             fluidRow(
                                 box(title="Tornado Magnitudes by Month",
                                     plotOutput("month_magnitude"), width=12)
+                            ),
+                            
+                            fluidRow(
+                                box(title="Percentage of Magnitudes by Month",
+                                    plotOutput("month_magnitude_percentage"), width=12)
                             )
                         ),
                         
                         tabPanel(title="Hour",
                             fluidRow(
+                                
+                                radioButtons("hour_radio", h4("Time Selection"),
+                                             choices=list("24 Hours" = 1, "AM/PM" = 2),
+                                             selected=1),
+                                
                                 box(title="Tornado Magnitudes by Hour",
-                                plotOutput("hour_magnitude"), width=12)
+                                plotOutput("hour_magnitude"), width=10)
                             )
                         ),
                         
@@ -64,7 +79,7 @@ ui <- dashboardPage(skin="black",
                                 plotOutput("distance_magnitude"), width=12),
                             
                                 box(title = "Distance of Tornado in Miles",
-                                sliderInput("slider", "Number of observations:", 0, 250, c(0, 100))
+                                sliderInput("slider", "Number of observations:", 0, 234, c(0, 100))
                             )
                             )
                                  
@@ -123,6 +138,17 @@ server <- function(input, output, session){
             guides(fill=guide_legend(title="Magnitude"))
     })
     
+    output$year_magnitude_percentage <- renderPlot({
+        ymgp_cols <-c("-9", "0", "1", "2", "3", "4", "5")
+        year_mag_per <- data.frame(t(apply(table(tornadoes$yr, tornadoes$mag), 1, function(i) i / sum(i))))
+        colnames(year_mag_per) <- ymgp_cols
+        melted_ymp <- melt(as.matrix(year_mag_per))
+        
+        ggplot(data=melted_ymp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
+            xlab("Year") + ylab("Percentage of Magnitudes")
+        
+    })
+    
     output$month_magnitude <- renderPlot({
         mo_mag <- data.frame(table(tornadoes$mo, tornadoes$mag))
         
@@ -130,6 +156,16 @@ server <- function(input, output, session){
             theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
             xlab("Month") + ylab("Total Tornadoes") + 
             guides(fill=guide_legend(title="Magnitude"))
+        
+    })
+    
+    output$month_magnitude_percentage <- renderPlot({
+        mo_mag_per <- data.frame(t(apply(table(tornadoes$mo, tornadoes$mag), 1, function(i) i / sum(i))))
+        colnames(mo_mag_per) <- magnitudes
+        melted_mmp <- melt(as.matrix(mo_mag_per))
+        
+        ggplot(data=melted_mmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
+            xlab("Month") + ylab("Percentage of Magnitudes")
         
     })
     

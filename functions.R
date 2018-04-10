@@ -26,9 +26,9 @@ ggplot(data=year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity'
     xlab("Year") + ylab("Total Tornadoes") + 
     guides(fill=guide_legend(title="Magnitude"))
 
-ymgp_cols <-c("-9", "0", "1", "2", "3", "4", "5")
+magnitudes <-c("-9", "0", "1", "2", "3", "4", "5")
 year_mag_per <- data.frame(t(apply(table(tornadoes$yr, tornadoes$mag), 1, function(i) i / sum(i))))
-colnames(year_mag_per) <- ymgp_cols
+colnames(year_mag_per) <- magnitudes
 melted_ymp <- melt(as.matrix(year_mag_per))
 
 ggplot(data=melted_ymp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
@@ -45,6 +45,14 @@ getTornadoCountsMonth <- function(tornadoes){
 }
 
 mo_mag <- data.frame(table(tornadoes$mo, tornadoes$mag))
+
+mo_mag_per <- data.frame(t(apply(table(tornadoes$mo, tornadoes$mag), 1, function(i) i / sum(i))))
+colnames(mo_mag_per) <- magnitudes
+melted_mmp <- melt(as.matrix(mo_mag_per))
+
+ggplot(data=melted_mmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
+    xlab("Month") + ylab("Percentage of Magnitudes")
+
 
 ggplot(data=mo_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') +
     theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
