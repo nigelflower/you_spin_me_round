@@ -3,7 +3,6 @@ library(lubridate)
 library(shiny)
 library(shinydashboard)
 
-#setwd("github/you_spin_me_round")
 
 tornadoes <- read.csv("tornadoes.csv")
 
@@ -32,29 +31,73 @@ ui <- dashboardPage(skin="black",
             
             tabItem(tabName="Tornadoes",
                 
-                fluidRow(
-                    box(title="Tornado Magnitudes by Year", 
-                        plotOutput("year_magnitude"), width=12)
-                ),
-                
-                fluidRow(
-                    box(title="Tornado Magnitudes by Month",
-                        plotOutput("month_magnitude"), width=12)
-                ),
-                
-                fluidRow(
-                    box(title="Tornado Magnitudes by Hour",
-                        plotOutput("hour_magnitude"), width=12)
-                ),
-                
-                fluidRow(
-                    box(title="Tornado Magnitude by Distance",
-                        plotOutput("distance_magnitude"), width=12),
+                # TODO Implement tab boxes to group all of the relevant
+                # visualizations together
+
+                mainPanel(
+                    tabsetPanel(
+                        
+                        tabPanel(title="Tornado Magnitudes by Year",
+                            fluidRow(
+                                box(title="Tornado Magnitudes by Year",
+                                    plotOutput("year_magnitude"), width=12)
+                            )
+                        ),
+
+                        tabPanel(title="Month",
+                            fluidRow(
+                                box(title="Tornado Magnitudes by Month",
+                                    plotOutput("month_magnitude"), width=12)
+                            )
+                        ),
+                        
+                        tabPanel(title="Hour",
+                            fluidRow(
+                                box(title="Tornado Magnitudes by Hour",
+                                plotOutput("hour_magnitude"), width=12)
+                            )
+                        ),
+                        
+                        tabPanel(title="Distance",
+                            fluidRow(
+                                box(title="Tornado Magnitude by Distance",
+                                plotOutput("distance_magnitude"), width=12),
+                            
+                                box(title = "Distance of Tornado in Miles",
+                                sliderInput("slider", "Number of observations:", 0, 250, c(0, 100))
+                            )
+                            )
+                                 
+                        )
                     
-                    box(title = "Distance of Tornado in Miles",
-                        sliderInput("slider", "Number of observations:", 0, 250, c(50, 100))
                     )
                 )
+                
+                # fluidRow(
+                #     box(title="Tornado Magnitudes by Year",
+                #         plotOutput("year_magnitude"), width=12)
+                # ),
+                # 
+                # fluidRow(
+                #     box(title="Tornado Magnitudes by Month",
+                #         plotOutput("month_magnitude"), width=12)
+                # ),
+                # 
+                # fluidRow(
+                #     box(title="Tornado Magnitudes by Hour",
+                #         plotOutput("hour_magnitude"), width=12)
+                # ),
+                # 
+                # fluidRow(
+                #     box(title="Tornado Magnitude by Distance",
+                #         plotOutput("distance_magnitude"), width=12),
+                # 
+                #     box(title = "Distance of Tornado in Miles",
+                #         sliderInput("slider", "Number of observations:", 0, 250, c(0, 100))
+                #     )
+                # )
+                
+                
             ),
             
             tabItem(tabName="Damages"
