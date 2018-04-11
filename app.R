@@ -65,22 +65,18 @@ ui <- dashboardPage(skin="black",
                     h2("Testing area for Leaflet Plotting"),
                     fluidRow(
                       box(width = 12,
-                          selectInput(inputId = "Select0", label = "Timescale",  width = "10%", 
-                                      c("Year" = "Year",
-                                        "Month" = "Month",
-                                        "Hour" = "Hour")),
-                          uiOutput("Slider0")
+                          sliderInput(inputId = "Slider0", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = "")
                       )
                     ),
                     
                     fluidRow(
                       box(width = 6,
-                          selectInput(inputId = "SelectState0", label = "State", state.name, selected = "Illinois"),
+                          selectInput(inputId = "SelectState0", label = "State", choices = state.abb, selected = "IL"),
                           uiOutput("reset0"),
                           leafletOutput("Leaf0")
                       ),
                       box(width = 6,
-                          selectInput(inputId = "SelectState1", label = "State", state.name, selected = "Illinois"),
+                          selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
                           uiOutput("reset1"),
                           leafletOutput("Leaf1")
                       )
@@ -96,8 +92,6 @@ ui <- dashboardPage(skin="black",
 # Ryan's variables pre-server
 
 states <- data.frame(state.name,state.abb,state.center[1],state.center[2])
-dataset <- subset(tornadoes, subset = st == "IL")
-dataset <- subset(dataset, subset = yr == "2016")
 fips <- state.fips
 
 server <- function(input, output, session){
@@ -145,7 +139,7 @@ server <- function(input, output, session){
     
 # Ryan Leaflet Server Code
     
-    # Reactive Variables
+    # TODO: clean Reactive Variables
     reactiveData <- reactive({
       # Things to constrain by:
       #  Year
@@ -159,28 +153,18 @@ server <- function(input, output, session){
     })
     # Variables for selecting state and lat/lon (separate from tornado dataset)
     state0 <- reactive({
-      states[state.name == input$SelectState0,]
+      states[state.abb == input$SelectState0,]
     })
     state1 <- reactive({
-      states[state.name == input$SelectState1,]
-    })
-    
-    
-    # UI output
-    output$Slider0 <- renderUI({
-      switch(input$Select0,
-             "Year" = 
-               sliderInput(inputId = "Slider0", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = ""),
-             "Month" =
-               sliderInput(inputId = "Slider0", label = "Month", min = 0, max = 11, value = 0, step = 1, animate = TRUE),
-             "Hour" =
-               sliderInput(inputId = "Slider0", label = "Hour", min = 0, max = 23, value = 0, step = 1, animate = TRUE)
-      )
+      states[state.abb == input$SelectState1,]
     })
     
     
     # Plot output
     output$Leaf0 <- renderLeaflet({
+      
+      dataset <- subset(tornadoes, st == input$SelectState0)
+      dataset <- subset(dataset, yr == input$Slider0)
       map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
         addTiles() %>% 
         addProviderTiles(providers$Stamen.TonerLite) %>%
@@ -193,13 +177,18 @@ server <- function(input, output, session){
       map
     })
     output$Leaf1 <- renderLeaflet({
+      
+      dataset <- subset(tornadoes, st == input$SelectState1)
+      dataset <- subset(dataset, yr == input$Slider0)
       map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
         addTiles() %>% 
         addProviderTiles(providers$Stamen.TonerLite) %>%
         setView(map, 
                 lng = state1()[,"x"], 
                 lat = state1()[,"y"], 
-                zoom = 6)
+                zoom = 6) %>%
+        addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
+        addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
       map
     })
 }
