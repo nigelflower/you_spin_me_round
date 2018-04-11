@@ -95,10 +95,10 @@ ui <- dashboardPage(skin="black",
 
 # Ryan's variables pre-server
 
-states <- data.frame(state.name,state.center[1],state.center[2])
+states <- data.frame(state.name,state.abb,state.center[1],state.center[2])
 dataset <- subset(tornadoes, subset = st == "IL")
 dataset <- subset(dataset, subset = yr == "2016")
-
+fips <- state.fips
 
 server <- function(input, output, session){
     
