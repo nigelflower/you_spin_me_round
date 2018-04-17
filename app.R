@@ -3,10 +3,9 @@ library(lubridate)
 library(shiny)
 library(shinydashboard)
 
-#setwd("github/you_spin_me_round")
 
 tornadoes <- read.csv("tornadoes.csv")
-
+magnitudes <-c("-9", "0", "1", "2", "3", "4", "5")
 
 ui <- dashboardPage(skin="black",
     dashboardHeader(title = "You Spin me Round"),
@@ -33,25 +32,100 @@ ui <- dashboardPage(skin="black",
             
             tabItem(tabName="Tornadoes",
                 
-                fluidRow(
-                    box(title="Tornado Magnitudes by Year", 
-                        plotOutput("year_magnitude"), width=12)
-                ),
-                
-                fluidRow(
-                    box(title="Tornado Magnitudes by Month",
-                        plotOutput("month_magnitude"), width=12)
-                ),
-                
-                fluidRow(
-                    box(title="Tornado Magnitudes by Hour",
-                        plotOutput("hour_magnitude"), width=12)
-                ),
-                
-                fluidRow(
-                    box(title="Tornado Magnitude by Distance",
-                        plotOutput("distance_magnitude"), width=12)
+                # TODO Implement tab boxes to group all of the relevant
+                # visualizations together
+
+                mainPanel(
+                    tabsetPanel(
+                        
+                        tabPanel(title="Tornado Magnitudes by Year",
+                            fluidRow(
+                                box(title="Tornado Magnitudes by Year",
+                                    plotOutput("year_magnitude"), width=12)
+                            ),
+                            
+                            fluidRow(
+                                box(title="Percentage of Magnitudes by Year",
+                                    plotOutput("year_magnitude_percentage"), width=12)
+                            )
+                        ),
+
+                        tabPanel(title="Month",
+                            fluidRow(
+                                box(title="Tornado Magnitudes by Month",
+                                    plotOutput("month_magnitude"), width=12)
+                            ),
+                            
+                            fluidRow(
+                                box(title="Percentage of Magnitudes by Month",
+                                    plotOutput("month_magnitude_percentage"), width=12)
+                            )
+                        ),
+                        
+                        tabPanel(title="Hour",
+                            fluidRow(
+                                
+                                radioButtons("hour_radio", h4("Time Selection"),
+                                             choices=list("24 Hours" = 1, "AM/PM" = 2),
+                                             selected=1),
+                                
+                                box(title="Tornado Magnitudes by Hour",
+                                plotOutput("hour_magnitude"), width=12)
+                            ),
+                            
+                            fluidRow(
+                                box(title="Percentage of Magnitudes by Hour",
+                                    plotOutput("hour_magnitude_percentage"), width=12)
+                            )
+                        ),
+                        
+                        tabPanel(title="Distance",
+                            fluidRow(
+                                box(title="Tornado Magnitude by Distance",
+                                plotOutput("distance_magnitude"), width=12)
+                            ),
+                            
+                            fluidRow(
+                                box(title="Percentage of Magnitudes by Distance",
+                                    plotOutput("distance_magnitude_percentage"), width=12)
+                            ),
+                            
+                            fluidRow(
+                                box(title = "Distance of Tornado in Miles",
+                                    sliderInput("slider", "Number of observations:", 0, 234, c(0, 100))
+                                )
+                            )
+                                 
+                        )
+                    
+                    )
                 )
+                
+                # fluidRow(
+                #     box(title="Tornado Magnitudes by Year",
+                #         plotOutput("year_magnitude"), width=12)
+                # ),
+                # 
+                # fluidRow(
+                #     box(title="Tornado Magnitudes by Month",
+                #         plotOutput("month_magnitude"), width=12)
+                # ),
+                # 
+                # fluidRow(
+                #     box(title="Tornado Magnitudes by Hour",
+                #         plotOutput("hour_magnitude"), width=12)
+                # ),
+                # 
+                # fluidRow(
+                #     box(title="Tornado Magnitude by Distance",
+                #         plotOutput("distance_magnitude"), width=12),
+                # 
+                #     box(title = "Distance of Tornado in Miles",
+                #         sliderInput("slider", "Number of observations:", 0, 250, c(0, 100))
+                #     )
+                # )
+                
+                
             ),
             
             tabItem(tabName="Damages"
@@ -105,6 +179,16 @@ server <- function(input, output, session){
             guides(fill=guide_legend(title="Magnitude"))
     })
     
+    output$year_magnitude_percentage <- renderPlot({
+        year_mag_per <- data.frame(t(apply(table(tornadoes$yr, tornadoes$mag), 1, function(i) i / sum(i))))
+        colnames(year_mag_per) <- magnitudes
+        melted_ymp <- melt(as.matrix(year_mag_per))
+        
+        ggplot(data=melted_ymp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
+            xlab("Year") + ylab("Percentage of Magnitudes")
+        
+    })
+    
     output$month_magnitude <- renderPlot({
         mo_mag <- data.frame(table(tornadoes$mo, tornadoes$mag))
         
@@ -112,6 +196,16 @@ server <- function(input, output, session){
             theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
             xlab("Month") + ylab("Total Tornadoes") + 
             guides(fill=guide_legend(title="Magnitude"))
+        
+    })
+    
+    output$month_magnitude_percentage <- renderPlot({
+        mo_mag_per <- data.frame(t(apply(table(tornadoes$mo, tornadoes$mag), 1, function(i) i / sum(i))))
+        colnames(mo_mag_per) <- magnitudes
+        melted_mmp <- melt(as.matrix(mo_mag_per))
+        
+        ggplot(data=melted_mmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
+            xlab("Month") + ylab("Percentage of Magnitudes")
         
     })
     
@@ -125,8 +219,18 @@ server <- function(input, output, session){
         
     })
     
+    output$hour_magnitude_percentage <- renderPlot({
+        hour_mag_per <- data.frame(t(apply(table(hours, tornadoes$mag), 1, function(i) i / sum(i))))
+        colnames(hour_mag_per) <- magnitudes
+        melted_hmp <- melt(as.matrix(hour_mag_per))
+        
+        ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
+            xlab("Hours") + ylab("Percentage of Magnitudes") +
+            guides(fill=guide_legend(title="Magnitude"))
+    })
+    
     output$distance_magnitude <- renderPlot({
-        filtered_tornadoes <- subset(tornadoes, len > 5 & len < 6)
+        filtered_tornadoes <- subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])
         filt_year_mag <- data.frame(table(filtered_tornadoes$yr, filtered_tornadoes$mag))
         
         ggplot(data=filt_year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') + 
@@ -136,7 +240,7 @@ server <- function(input, output, session){
         
     })
     
-    
+
 # Ryan Leaflet Server Code
     
     # TODO: clean Reactive Variables
@@ -176,6 +280,7 @@ server <- function(input, output, session){
         addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
       map
     })
+    
     output$Leaf1 <- renderLeaflet({
       
       dataset <- subset(tornadoes, st == input$SelectState1)
@@ -190,6 +295,17 @@ server <- function(input, output, session){
         addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
         addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
       map
+    })
+    
+    output$distance_magnitude_percentage <- renderPlot({
+        filtered_tornadoes <- subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])
+        filt_year_mag_per <- data.frame(t(apply(table(filtered_tornadoes$yr, filtered_tornadoes$mag), 1, function(i) i / sum(i))))
+        #colnames(filt_year_mag_per) <- magnitudes
+        melted_fymp <- melt(as.matrix(filt_year_mag_per))
+        
+        ggplot(data=melted_fymp, aes(x=Var1, y=value, color=factor(Var2))) + 
+            geom_line(size=3) + xlab("Year") + ylab("Percentage of Magnitudes")
+        
     })
 }
 
