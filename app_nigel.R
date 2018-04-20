@@ -159,29 +159,31 @@ ui <- dashboardPage(skin="black",
                                             )
                                         ),
                                         
+                                        # sliderInput("slider", "Number of observations:", 0, 234, c(0, 100))
+                                        
                                         # Filter by Width
                                         column(2,
-                                            sliderInput()      
+                                            box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 0))     
                                         ),
                                         
                                         # Filter by Length
                                         column(2,
-                                            sliderInput()  
+                                            sliderInput("lengthSlider", "Filter By Length", 0, 234, 0)  
                                         ),
                                         
                                         # Filter by Injuries
                                         column(2,
-                                            sliderInput()
+                                            sliderInput("injurySlider", "Filter By Injuries", 0, 1740, 0)
                                         ),
                                         
                                         # Filter by Loss
                                         column(2,
-                                            sliderInput()
+                                            sliderInput("lossSlider", "Filter By Losses", 0, 22000000, 0)
                                         ),
                                         
                                         # Filter by Year
                                         column(2,
-                                            sliderInput()
+                                            sliderInput("yearSlider", "Filter By Year", 1950, 2016, 1950)
                                         )
                                     ),
                                     
