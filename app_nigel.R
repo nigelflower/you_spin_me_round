@@ -35,9 +35,6 @@ ui <- dashboardPage(skin="black",
                             
                             tabItem(tabName="Tornadoes",
                                     
-                                    # TODO Implement tab boxes to group all of the relevant
-                                    # visualizations together
-                                    
                                     mainPanel(
                                         tabsetPanel(
                                             
@@ -143,6 +140,48 @@ ui <- dashboardPage(skin="black",
                                     fluidRow(
                                         box(width = 12,
                                             sliderInput(inputId = "Slider0", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = "")
+                                        )
+                                    ),
+                                    
+                                    fluidRow(
+                                        
+                                        # Filter by Magnitude
+                                        column(2,
+                                            checkboxGroupInput("magnitudeFilter",
+                                                h3("Filter by Magnitude"),
+                                                choices = list("-9" = 1, 
+                                                               "0" = 2, 
+                                                               "1" = 3, 
+                                                               "2" = 4, 
+                                                               "3" = 5, 
+                                                               "4" = 6,
+                                                               "5" = 7)
+                                            )
+                                        ),
+                                        
+                                        # Filter by Width
+                                        column(2,
+                                            sliderInput()      
+                                        ),
+                                        
+                                        # Filter by Length
+                                        column(2,
+                                            sliderInput()  
+                                        ),
+                                        
+                                        # Filter by Injuries
+                                        column(2,
+                                            sliderInput()
+                                        ),
+                                        
+                                        # Filter by Loss
+                                        column(2,
+                                            sliderInput()
+                                        ),
+                                        
+                                        # Filter by Year
+                                        column(2,
+                                            sliderInput()
                                         )
                                     ),
                                     
