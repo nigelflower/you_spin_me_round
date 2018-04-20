@@ -318,11 +318,11 @@ server <- function(input, output, session){
         mag_filter <- input$magnitudeFilter
         
         if(!is.null(mag_filter)){
-            dataset <- subset(tornadoes, mag %in% mag_filter)
+            dataset <- subset(dataset, mag %in% mag_filter)
             print(strtoi(input$magnitudeFilter))
         }
         else{
-            print("No Checks Selected")
+            #dataset <- subset(dataset, )
         }
         
         
