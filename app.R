@@ -141,22 +141,59 @@ ui <- dashboardPage(skin="black",
             tabItem(tabName="TestLeaf",
                     h2("Testing area for Leaflet Plotting"),
                     fluidRow(
-                      box(width = 12,
-                          sliderInput(inputId = "Slider0", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = "")
-                      )
+                        box(width = 12,
+                            sliderInput(inputId = "Slider0", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = "")
+                        )
                     ),
                     
                     fluidRow(
-                      box(width = 6,
-                          selectInput(inputId = "SelectState0", label = "State", choices = state.abb, selected = "IL"),
-                          uiOutput("reset0"),
-                          leafletOutput("Leaf0")
-                      ),
-                      box(width = 6,
-                          selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
-                          uiOutput("reset1"),
-                          leafletOutput("Leaf1")
-                      )
+                        
+                        # Filter by Magnitude
+                        column(2,
+                               checkboxGroupInput("magnitudeFilter",
+                                                  h3("Filter by Magnitude"),
+                                                  choices = list("-9" = -9, 
+                                                                 "0" = 0, 
+                                                                 "1" = 1, 
+                                                                 "2" = 2, 
+                                                                 "3" = 3, 
+                                                                 "4" = 4,
+                                                                 "5" = 5)
+                               )
+                        ),
+                        
+                        # Filter by Width
+                        column(2,
+                               box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 4576))
+                        ),
+                        
+                        # Filter by Length
+                        column(2,
+                               sliderInput("lengthSlider", "Filter By Length", 0, 234, 234)
+                        ),
+                        
+                        # Filter by Injuries
+                        column(2,
+                               sliderInput("injurySlider", "Filter By Injuries", 0, 1740, 1740)
+                        ),
+                        
+                        # Filter by Loss
+                        column(2,
+                               sliderInput("lossSlider", "Filter By Losses", 0, 22000000, 22000000)
+                        )
+                    ),
+                    
+                    fluidRow(
+                        box(width = 6,
+                            selectInput(inputId = "SelectState0", label = "State", choices = state.abb, selected = "IL"),
+                            uiOutput("reset0"),
+                            leafletOutput("Leaf0")
+                        ),
+                        box(width = 6,
+                            selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
+                            uiOutput("reset1"),
+                            leafletOutput("Leaf1")
+                        )
                     )
                     
                     
@@ -269,9 +306,35 @@ server <- function(input, output, session){
     
     # Plot output
     output$Leaf0 <- renderLeaflet({
-      
+      # Subset by Year And State
       dataset <- subset(tornadoes, st == input$SelectState0)
       dataset <- subset(dataset, yr == input$Slider0)
+      
+      # Subset by Magnitude
+      mag_filter <- input$magnitudeFilter
+      
+      if(!is.null(mag_filter)){
+          dataset <- subset(dataset, mag %in% mag_filter)
+          print(strtoi(input$magnitudeFilter))
+      }
+      
+      # Subset by Width
+      wid_filter <- input$widthSlider
+      dataset <- subset(dataset, wid < wid_filter)
+      
+      # Subset by Length
+      len_filter <- input$lengthSlider
+      dataset <- subset(dataset, len < len_filter)
+      print(len_filter)
+      
+      # Subset by Injuries
+      inj_filter <- input$injurySlider
+      dataset <- subset(dataset, inj < inj_filter)
+      
+      # Subset by Loss
+      loss_filter <- input$lossSlider
+      dataset <- subset(dataset, loss < loss_filter)
+      
       map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
         addTiles() %>% 
         addProviderTiles(providers$Stamen.TonerLite) %>%
