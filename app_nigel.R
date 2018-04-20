@@ -163,7 +163,7 @@ ui <- dashboardPage(skin="black",
                                         
                                         # Filter by Width
                                         column(10,
-                                            box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 0))     
+                                            box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 4576))     
                                         )
                                         
                                         # # Filter by Length
@@ -321,11 +321,12 @@ server <- function(input, output, session){
             dataset <- subset(dataset, mag %in% mag_filter)
             print(strtoi(input$magnitudeFilter))
         }
-        else{
-            #dataset <- subset(dataset, )
-        }
         
+        # Subset by Width
+        wid_filter <- input$widthSlider
+        dataset <- subset(dataset, wid < wid_filter)
         
+        print(wid_filter)
         
         map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
             addTiles() %>% 
