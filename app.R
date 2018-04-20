@@ -241,7 +241,6 @@ server <- function(input, output, session){
             theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
             xlab("Year") + ylab("Total Tornadoes") + 
             guides(fill=guide_legend(title="Magnitude"))
-        
     })
     
 
