@@ -149,42 +149,42 @@ ui <- dashboardPage(skin="black",
                                         column(2,
                                             checkboxGroupInput("magnitudeFilter",
                                                 h3("Filter by Magnitude"),
-                                                choices = list("-9" = 1, 
-                                                               "0" = 2, 
-                                                               "1" = 3, 
-                                                               "2" = 4, 
-                                                               "3" = 5, 
-                                                               "4" = 6,
-                                                               "5" = 7)
+                                                choices = list("-9" = -9, 
+                                                               "0" = 0, 
+                                                               "1" = 1, 
+                                                               "2" = 2, 
+                                                               "3" = 3, 
+                                                               "4" = 4,
+                                                               "5" = 5)
                                             )
                                         ),
                                         
                                         # sliderInput("slider", "Number of observations:", 0, 234, c(0, 100))
                                         
                                         # Filter by Width
-                                        column(2,
+                                        column(10,
                                             box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 0))     
-                                        ),
-                                        
-                                        # Filter by Length
-                                        column(2,
-                                            sliderInput("lengthSlider", "Filter By Length", 0, 234, 0)  
-                                        ),
-                                        
-                                        # Filter by Injuries
-                                        column(2,
-                                            sliderInput("injurySlider", "Filter By Injuries", 0, 1740, 0)
-                                        ),
-                                        
-                                        # Filter by Loss
-                                        column(2,
-                                            sliderInput("lossSlider", "Filter By Losses", 0, 22000000, 0)
-                                        ),
-                                        
-                                        # Filter by Year
-                                        column(2,
-                                            sliderInput("yearSlider", "Filter By Year", 1950, 2016, 1950)
                                         )
+                                        
+                                        # # Filter by Length
+                                        # column(2,
+                                        #     sliderInput("lengthSlider", "Filter By Length", 0, 234, 0)  
+                                        # ),
+                                        # 
+                                        # # Filter by Injuries
+                                        # column(2,
+                                        #     sliderInput("injurySlider", "Filter By Injuries", 0, 1740, 0)
+                                        # ),
+                                        # 
+                                        # # Filter by Loss
+                                        # column(2,
+                                        #     sliderInput("lossSlider", "Filter By Losses", 0, 22000000, 0)
+                                        # ),
+                                        # 
+                                        # # Filter by Year
+                                        # column(2,
+                                        #     sliderInput("yearSlider", "Filter By Year", 1950, 2016, 1950)
+                                        # )
                                     ),
                                     
                                     fluidRow(
@@ -310,9 +310,23 @@ server <- function(input, output, session){
     
     # Plot output
     output$Leaf0 <- renderLeaflet({
-        
+        # Subset by Year And State
         dataset <- subset(tornadoes, st == input$SelectState0)
         dataset <- subset(dataset, yr == input$Slider0)
+        
+        # Subset by Magnitude
+        mag_filter <- input$magnitudeFilter
+        
+        if(!is.null(mag_filter)){
+            dataset <- subset(tornadoes, mag %in% mag_filter)
+            print(strtoi(input$magnitudeFilter))
+        }
+        else{
+            print("No Checks Selected")
+        }
+        
+        
+        
         map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
             addTiles() %>% 
             addProviderTiles(providers$Stamen.TonerLite) %>%
