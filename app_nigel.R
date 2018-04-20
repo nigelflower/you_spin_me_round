@@ -159,32 +159,25 @@ ui <- dashboardPage(skin="black",
                                             )
                                         ),
                                         
-                                        # sliderInput("slider", "Number of observations:", 0, 234, c(0, 100))
-                                        
                                         # Filter by Width
-                                        # column(2,
-                                        #     box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 4576))     
-                                        # ),
-                                        # 
-                                        # # # Filter by Length
-                                        # column(2,
-                                        #     sliderInput("lengthSlider", "Filter By Length", 0, 234, 234)
-                                        # ),
-                                        # 
-                                        # # Filter by Injuries
-                                        # column(2,
-                                        #     sliderInput("injurySlider", "Filter By Injuries", 0, 1740, 0)
-                                        # ),
-                                        # 
-                                        # # Filter by Loss
-                                        # column(2,
-                                        #     sliderInput("lossSlider", "Filter By Losses", 0, 22000000, 0)
-                                        # ),
-                                        # 
-                                        # # Filter by Year
-                                        # column(2,
-                                        #     sliderInput("yearSlider", "Filter By Year", 1950, 2016, 1950)
-                                        # )
+                                        column(2,
+                                            box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 4576))
+                                        ),
+
+                                        # Filter by Length
+                                        column(2,
+                                            sliderInput("lengthSlider", "Filter By Length", 0, 234, 234)
+                                        ),
+
+                                        # Filter by Injuries
+                                        column(2,
+                                            sliderInput("injurySlider", "Filter By Injuries", 0, 1740, 1740)
+                                        ),
+
+                                        # Filter by Loss
+                                        column(2,
+                                            sliderInput("lossSlider", "Filter By Losses", 0, 22000000, 0)
+                                        )
                                     ),
                                     
                                     fluidRow(
@@ -321,16 +314,24 @@ server <- function(input, output, session){
             dataset <- subset(dataset, mag %in% mag_filter)
             print(strtoi(input$magnitudeFilter))
         }
-        # 
-        # # Subset by Width
-        # wid_filter <- input$widthSlider
-        # dataset <- subset(dataset, wid < wid_filter)
-        # 
-        # # Subset by Length
-        # len_filter <- input$lengthSlider
-        # dataset <- subset(dataset, len < len_filter)
-        # print(len_filter)
-        
+
+        # Subset by Width
+        wid_filter <- input$widthSlider
+        dataset <- subset(dataset, wid < wid_filter)
+
+        # Subset by Length
+        len_filter <- input$lengthSlider
+        dataset <- subset(dataset, len < len_filter)
+        print(len_filter)
+
+        # Subset by Injuries
+        inj_filter <- input$injurySlider
+        dataset <- subset(dataset, inj < inj_filter)
+
+        # Subset by Loss
+        loss_filter <- input$lossSlider
+        dataset <- subset(dataset, loss < loss_filter)
+
         map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
             addTiles() %>% 
             addProviderTiles(providers$Stamen.TonerLite) %>%
