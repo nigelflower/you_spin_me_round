@@ -162,13 +162,13 @@ ui <- dashboardPage(skin="black",
                                         # sliderInput("slider", "Number of observations:", 0, 234, c(0, 100))
                                         
                                         # Filter by Width
-                                        column(10,
-                                            box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 4576))     
-                                        )
-                                        
-                                        # # Filter by Length
                                         # column(2,
-                                        #     sliderInput("lengthSlider", "Filter By Length", 0, 234, 0)  
+                                        #     box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 4576))     
+                                        # ),
+                                        # 
+                                        # # # Filter by Length
+                                        # column(2,
+                                        #     sliderInput("lengthSlider", "Filter By Length", 0, 234, 234)
                                         # ),
                                         # 
                                         # # Filter by Injuries
@@ -321,12 +321,15 @@ server <- function(input, output, session){
             dataset <- subset(dataset, mag %in% mag_filter)
             print(strtoi(input$magnitudeFilter))
         }
-        
-        # Subset by Width
-        wid_filter <- input$widthSlider
-        dataset <- subset(dataset, wid < wid_filter)
-        
-        print(wid_filter)
+        # 
+        # # Subset by Width
+        # wid_filter <- input$widthSlider
+        # dataset <- subset(dataset, wid < wid_filter)
+        # 
+        # # Subset by Length
+        # len_filter <- input$lengthSlider
+        # dataset <- subset(dataset, len < len_filter)
+        # print(len_filter)
         
         map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
             addTiles() %>% 
