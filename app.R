@@ -1,11 +1,14 @@
+library(leaflet)
 library(ggplot2)
 library(lubridate)
 library(shiny)
 library(shinydashboard)
-
+library(maps)
+library(reshape2)
 
 tornadoes <- read.csv("tornadoes.csv")
 magnitudes <-c("-9", "0", "1", "2", "3", "4", "5")
+hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
 
 ui <- dashboardPage(skin="black",
     dashboardHeader(title = "You Spin me Round"),
@@ -210,7 +213,7 @@ server <- function(input, output, session){
     })
     
     output$hour_magnitude <- renderPlot({
-        hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
+        # hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
         hour_mag <- data.frame(table(hours, tornadoes$mag))
         ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
             theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
@@ -220,6 +223,7 @@ server <- function(input, output, session){
     })
     
     output$hour_magnitude_percentage <- renderPlot({
+        # hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
         hour_mag_per <- data.frame(t(apply(table(hours, tornadoes$mag), 1, function(i) i / sum(i))))
         colnames(hour_mag_per) <- magnitudes
         melted_hmp <- melt(as.matrix(hour_mag_per))
@@ -237,7 +241,6 @@ server <- function(input, output, session){
             theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
             xlab("Year") + ylab("Total Tornadoes") + 
             guides(fill=guide_legend(title="Magnitude"))
-        
     })
     
 
