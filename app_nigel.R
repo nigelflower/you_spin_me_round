@@ -10,6 +10,9 @@ tornadoes <- read.csv("tornadoes.csv")
 magnitudes <-c("-9", "0", "1", "2", "3", "4", "5")
 hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
 
+# Maybe add in Thunderforest.SpinalMap for fun....
+provider_tiles <- c("Stamen Toner", "Open Topo Map", "Thunderforest Landscape", "Esri World Imagery", "Stamen Watercolor")
+
 ui <- dashboardPage(skin="black",
                     dashboardHeader(title = "You Spin me Round"),
                     
@@ -17,18 +20,18 @@ ui <- dashboardPage(skin="black",
                         sidebarMenu(
                             menuItem("About", tabName = "About"),
                             menuItem("Tornadoes", tabName="Tornadoes",
-                                     menuSubItem("Year", 
-                                                 tabName="Year",
-                                                 icon=icon("line-chart")),
-                                     menuSubItem("Month",
-                                                 tabName="Month",
-                                                 icon=icon("calendar")),
-                                     menuSubItem("Hour", 
-                                                 tabName="Hour",
-                                                 icon=icon("hourglass")),
-                                     menuSubItem("Distance",
-                                                 tabName="Distance",
-                                                 icon=icon("plane"))
+                                 menuSubItem("Year", 
+                                             tabName="Year",
+                                             icon=icon("line-chart")),
+                                 menuSubItem("Month",
+                                             tabName="Month",
+                                             icon=icon("calendar")),
+                                 menuSubItem("Hour", 
+                                             tabName="Hour",
+                                             icon=icon("hourglass")),
+                                 menuSubItem("Distance",
+                                             tabName="Distance",
+                                             icon=icon("plane"))
                             ),
                             menuItem("Damages", tabName="Damages"),
                             menuItem("Illinois", tabName="Illinois"),
@@ -39,69 +42,69 @@ ui <- dashboardPage(skin="black",
                     dashboardBody(
                         tabItems(
                             tabItem(tabName = "About",
-                                    h1(style = "font-size: 300%","Project 3: You Spin me Round"),
-                                    h4(style = "font-size: 100%","by: Daria Azhari, Nigel Flower, Jason Guo,  Ryan Nishimoto"),
-                                    h4(style = "font-size: 150%",a(href = "https://sites.google.com/uic.edu/nishimo1/cs424/project03", "Project Website")),
-                                    h2(style = "font-size: 200%","CS 424: Visualization and Visual Analytics"),
-                                    h4(style = "font-size: 150%",a(href = "https://www.evl.uic.edu/aej/424/", "Course website"))
+                                h1(style = "font-size: 300%","Project 3: You Spin me Round"),
+                                h4(style = "font-size: 100%","by: Daria Azhari, Nigel Flower, Jason Guo,  Ryan Nishimoto"),
+                                h4(style = "font-size: 150%",a(href = "https://sites.google.com/uic.edu/nishimo1/cs424/project03", "Project Website")),
+                                h2(style = "font-size: 200%","CS 424: Visualization and Visual Analytics"),
+                                h4(style = "font-size: 150%",a(href = "https://www.evl.uic.edu/aej/424/", "Course website"))
                             ),
                             
                             tabItem(tabName="Year",
-                                    fluidRow(
-                                        box(title="Tornado Magnitudes by Year",
-                                            plotOutput("year_magnitude"), width=12)
-                                    ),
-                                    
-                                    fluidRow(
-                                        box(title="Percentage of Magnitudes by Year",
-                                            plotOutput("year_magnitude_percentage"), width=12)
-                                    )
+                                fluidRow(
+                                    box(title="Tornado Magnitudes by Year",
+                                        plotOutput("year_magnitude"), width=12)
+                                ),
+                                
+                                fluidRow(
+                                    box(title="Percentage of Magnitudes by Year",
+                                        plotOutput("year_magnitude_percentage"), width=12)
+                                )
                             ),
                             
                             tabItem(tabName="Month",
-                                    fluidRow(
-                                        box(title="Tornado Magnitudes by Month",
-                                            plotOutput("month_magnitude"), width=12)
-                                    ),
-                                    
-                                    fluidRow(
-                                        box(title="Percentage of Magnitudes by Month",
-                                            plotOutput("month_magnitude_percentage"), width=12)
-                                    )
+                                fluidRow(
+                                    box(title="Tornado Magnitudes by Month",
+                                        plotOutput("month_magnitude"), width=12)
+                                ),
+                                
+                                fluidRow(
+                                    box(title="Percentage of Magnitudes by Month",
+                                        plotOutput("month_magnitude_percentage"), width=12)
+                                )
                             ),
                             
                             tabItem(tabName="Hour",
-                                    fluidRow(
-                                        radioButtons("hour_radio", h4("Time Selection"),
-                                                     choices=list("24 Hours" = 1, "AM/PM" = 2),
-                                                     selected=1),
-                                        
-                                        box(title="Tornado Magnitudes by Hour",
-                                            plotOutput("hour_magnitude"), width=12)
-                                    ),
+                                fluidRow(
+                                    radioButtons("hour_radio", h4("Time Selection"),
+                                                 choices=list("24 Hours" = 1, "AM/PM" = 2),
+                                                 selected=1),
                                     
-                                    fluidRow(
-                                        box(title="Percentage of Magnitudes by Hour",
-                                            plotOutput("hour_magnitude_percentage"), width=12)
-                                    )
+                                    box(title="Tornado Magnitudes by Hour",
+                                        plotOutput("hour_magnitude"), width=12)
+                                ),
+                                
+                                fluidRow(
+                                    box(title="Percentage of Magnitudes by Hour",
+                                        plotOutput("hour_magnitude_percentage"), width=12)
+                                )
                             ),
                             
                             tabItem(tabName="Distance",
-                                    fluidRow(
-                                        box(title="Tornado Magnitude by Distance",
-                                            plotOutput("distance_magnitude"), width=12)
-                                    ),
-                                    
-                                    fluidRow(
-                                        box(title="Percentage of Magnitudes by Distance",
-                                            plotOutput("distance_magnitude_percentage"), width=12)
-                                    ),
-                                    
-                                    fluidRow(
-                                        box(title = "Distance of Tornado in Miles",
-                                            sliderInput("slider", "Number of observations:", 0, 234, c(0, 100))
-                                        )
+                                fluidRow(
+                                    box(title="Tornado Magnitude by Distance",
+                                        plotOutput("distance_magnitude"), width=12)
+                                ),
+                                
+                                fluidRow(
+                                    box(title="Percentage of Magnitudes by Distance",
+                                        plotOutput("distance_magnitude_percentage"), width=12)
+                                ),
+                                
+                                fluidRow(
+                                    box(title = "Distance of Tornado in Miles",
+                                        sliderInput("slider", "Number of observations:", 0, 234, c(0, 100))
                                     )
+                                )
                             ),
                             
                             tabItem(tabName="Damages"
@@ -113,68 +116,64 @@ ui <- dashboardPage(skin="black",
                             ),
                             
                             tabItem(tabName="TestLeaf",
-                                    h2("Testing area for Leaflet Plotting"),
-                                    fluidRow(
-                                        box(width = 12,
-                                            sliderInput(inputId = "Slider0", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = "")
-                                        )
-                                    ),
-                                    
-                                    fluidRow(
-                                        
-                                        # Filter by Magnitude
-                                        column(2,
-                                               checkboxGroupInput("magnitudeFilter",
-                                                                  h3("Filter by Magnitude"),
-                                                                  choices = list("-9" = -9, 
-                                                                                 "0" = 0, 
-                                                                                 "1" = 1, 
-                                                                                 "2" = 2, 
-                                                                                 "3" = 3, 
-                                                                                 "4" = 4,
-                                                                                 "5" = 5)
-                                               )
-                                        ),
-                                        
-                                        # Filter by Width
-                                        column(2,
-                                               box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 4576))
-                                        ),
-                                        
-                                        # Filter by Length
-                                        column(2,
-                                               sliderInput("lengthSlider", "Filter By Length", 0, 234, 234)
-                                        ),
-                                        
-                                        # Filter by Injuries
-                                        column(2,
-                                               sliderInput("injurySlider", "Filter By Injuries", 0, 1740, 1740)
-                                        ),
-                                        
-                                        # Filter by Loss
-                                        column(2,
-                                               sliderInput("lossSlider", "Filter By Losses", 0, 22000000, 22000000)
-                                        )
-                                    ),
-                                    
-                                    fluidRow(
-                                        box(width = 6,
-                                            selectInput(inputId = "SelectState0", label = "State", choices = state.abb, selected = "IL"),
-                                            uiOutput("reset0"),
-                                            leafletOutput("Leaf0")
-                                        ),
-                                        box(width = 6,
-                                            selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
-                                            uiOutput("reset1"),
-                                            leafletOutput("Leaf1")
-                                        )
+                                h2("Testing area for Leaflet Plotting"),
+                                fluidRow(
+                                    box(width = 12,
+                                        sliderInput(inputId = "Slider0", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = "")
                                     )
+                                ),
+                                
+                                fluidRow(
+                                    # Filter by Magnitude
+                                    column(2,
+                                           checkboxGroupInput("magnitudeFilter",
+                                                              h3("Filter by Magnitude"),
+                                                              choices = list("-9" = -9, 
+                                                                             "0" = 0, 
+                                                                             "1" = 1, 
+                                                                             "2" = 2, 
+                                                                             "3" = 3, 
+                                                                             "4" = 4,
+                                                                             "5" = 5))
+                                    ),
                                     
+                                    # Filter by Width
+                                    column(2,
+                                           box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 4576))
+                                    ),
                                     
+                                    # Filter by Length
+                                    column(2,
+                                           sliderInput("lengthSlider", "Filter By Length", 0, 234, 234)
+                                    ),
+                                    
+                                    # Filter by Injuries
+                                    column(2,
+                                           sliderInput("injurySlider", "Filter By Injuries", 0, 1740, 1740)
+                                    ),
+                                    
+                                    # Filter by Loss
+                                    column(2,
+                                           sliderInput("lossSlider", "Filter By Losses", 0, 22000000, 22000000)
+                                    )
+                                ),
+                                
+                                fluidRow(
+                                    box(width = 6,
+                                        selectInput(inputId = "SelectState0", label = "State", choices = state.abb, selected = "IL"),
+                                        selectInput(inputId = "MapSelect", label="Select Map Type", choices = provider_tiles, selected="Stamen Toner"),
+                                        uiOutput("reset0"),
+                                        leafletOutput("Leaf0")
+                                    ),
+                                    box(width = 6,
+                                        selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
+                                        uiOutput("reset1"),
+                                        leafletOutput("Leaf1")
+                                    )
+                                )
                             )
                         )
                     )
-                    
 )
 
 # Ryan's variables pre-server
@@ -282,7 +281,7 @@ server <- function(input, output, session){
     output$Leaf0 <- renderLeaflet({
         # Subset by Year And State
         dataset <- subset(tornadoes, st == input$SelectState0)
-        dataset <- subset(dataset, yr == input$Slider0)
+        dataset <- subset(dataset, yr <= input$Slider0)
         
         # Subset by Magnitude
         mag_filter <- input$magnitudeFilter
@@ -311,7 +310,7 @@ server <- function(input, output, session){
         
         map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
             addTiles() %>% 
-            addProviderTiles(providers$Stamen.TonerLite) %>%
+            addProviderTiles(providers$Stamen.Toner) %>%
             setView(map, 
                     lng = state0()[,"x"],
                     lat = state0()[,"y"], 
@@ -327,7 +326,10 @@ server <- function(input, output, session){
         dataset <- subset(dataset, yr == input$Slider0)
         map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
             addTiles() %>% 
+            
+            # Select leaflet provider tiles from user input
             addProviderTiles(providers$Stamen.TonerLite) %>%
+            
             setView(map, 
                     lng = state1()[,"x"], 
                     lat = state1()[,"y"], 
