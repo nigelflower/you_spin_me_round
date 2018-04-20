@@ -308,9 +308,6 @@ server <- function(input, output, session){
         loss_filter <- input$lossSlider
         dataset <- subset(dataset, loss < loss_filter)
         
-        
-        provider_tiles <- c("Stamen Toner", "Open Topo Map", "Thunderforest Landscape", "Esri World Imagery", "Stamen Watercolor")
-        
         # Select Provider Tiles
         if(input$MapSelect == "Stamen Toner"){
             tiles <- providers$Stamen.Toner
