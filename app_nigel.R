@@ -16,7 +16,20 @@ ui <- dashboardPage(skin="black",
                     dashboardSidebar(
                         sidebarMenu(
                             menuItem("About", tabName = "About"),
-                            menuItem("Tornadoes", tabName="Tornadoes"),
+                            menuItem("Tornadoes", tabName="Tornadoes",
+                                     menuSubItem("Year", 
+                                                 tabName="Year",
+                                                 icon=icon("line-chart")),
+                                     menuSubItem("Month",
+                                                 tabName="Month",
+                                                 icon=icon("calendar")),
+                                     menuSubItem("Hour", 
+                                                 tabName="Hour",
+                                                 icon=icon("hourglass")),
+                                     menuSubItem("Distance",
+                                                 tabName="Distance",
+                                                 icon=icon("plane"))
+                            ),
                             menuItem("Damages", tabName="Damages"),
                             menuItem("Illinois", tabName="Illinois"),
                             menuItem("TestLeaf", tabName = "TestLeaf")
@@ -33,99 +46,62 @@ ui <- dashboardPage(skin="black",
                                     h4(style = "font-size: 150%",a(href = "https://www.evl.uic.edu/aej/424/", "Course website"))
                             ),
                             
-                            tabItem(tabName="Tornadoes",
+                            tabItem(tabName="Year",
+                                    fluidRow(
+                                        box(title="Tornado Magnitudes by Year",
+                                            plotOutput("year_magnitude"), width=12)
+                                    ),
                                     
-                                    mainPanel(
-                                        tabsetPanel(
-                                            
-                                            tabPanel(title="Tornado Magnitudes by Year",
-                                                     fluidRow(
-                                                         box(title="Tornado Magnitudes by Year",
-                                                             plotOutput("year_magnitude"), width=12)
-                                                     ),
-                                                     
-                                                     fluidRow(
-                                                         box(title="Percentage of Magnitudes by Year",
-                                                             plotOutput("year_magnitude_percentage"), width=12)
-                                                     )
-                                            ),
-                                            
-                                            tabPanel(title="Month",
-                                                     fluidRow(
-                                                         box(title="Tornado Magnitudes by Month",
-                                                             plotOutput("month_magnitude"), width=12)
-                                                     ),
-                                                     
-                                                     fluidRow(
-                                                         box(title="Percentage of Magnitudes by Month",
-                                                             plotOutput("month_magnitude_percentage"), width=12)
-                                                     )
-                                            ),
-                                            
-                                            tabPanel(title="Hour",
-                                                     fluidRow(
-                                                         
-                                                         radioButtons("hour_radio", h4("Time Selection"),
-                                                                      choices=list("24 Hours" = 1, "AM/PM" = 2),
-                                                                      selected=1),
-                                                         
-                                                         box(title="Tornado Magnitudes by Hour",
-                                                             plotOutput("hour_magnitude"), width=12)
-                                                     ),
-                                                     
-                                                     fluidRow(
-                                                         box(title="Percentage of Magnitudes by Hour",
-                                                             plotOutput("hour_magnitude_percentage"), width=12)
-                                                     )
-                                            ),
-                                            
-                                            tabPanel(title="Distance",
-                                                     fluidRow(
-                                                         box(title="Tornado Magnitude by Distance",
-                                                             plotOutput("distance_magnitude"), width=12)
-                                                     ),
-                                                     
-                                                     fluidRow(
-                                                         box(title="Percentage of Magnitudes by Distance",
-                                                             plotOutput("distance_magnitude_percentage"), width=12)
-                                                     ),
-                                                     
-                                                     fluidRow(
-                                                         box(title = "Distance of Tornado in Miles",
-                                                             sliderInput("slider", "Number of observations:", 0, 234, c(0, 100))
-                                                         )
-                                                     )
-                                                     
-                                            )
-                                            
+                                    fluidRow(
+                                        box(title="Percentage of Magnitudes by Year",
+                                            plotOutput("year_magnitude_percentage"), width=12)
+                                    )
+                            ),
+                            
+                            tabItem(tabName="Month",
+                                    fluidRow(
+                                        box(title="Tornado Magnitudes by Month",
+                                            plotOutput("month_magnitude"), width=12)
+                                    ),
+                                    
+                                    fluidRow(
+                                        box(title="Percentage of Magnitudes by Month",
+                                            plotOutput("month_magnitude_percentage"), width=12)
+                                    )
+                            ),
+                            
+                            tabItem(tabName="Hour",
+                                    fluidRow(
+                                        radioButtons("hour_radio", h4("Time Selection"),
+                                                     choices=list("24 Hours" = 1, "AM/PM" = 2),
+                                                     selected=1),
+                                        
+                                        box(title="Tornado Magnitudes by Hour",
+                                            plotOutput("hour_magnitude"), width=12)
+                                    ),
+                                    
+                                    fluidRow(
+                                        box(title="Percentage of Magnitudes by Hour",
+                                            plotOutput("hour_magnitude_percentage"), width=12)
+                                    )
+                            ),
+                            
+                            tabItem(tabName="Distance",
+                                    fluidRow(
+                                        box(title="Tornado Magnitude by Distance",
+                                            plotOutput("distance_magnitude"), width=12)
+                                    ),
+                                    
+                                    fluidRow(
+                                        box(title="Percentage of Magnitudes by Distance",
+                                            plotOutput("distance_magnitude_percentage"), width=12)
+                                    ),
+                                    
+                                    fluidRow(
+                                        box(title = "Distance of Tornado in Miles",
+                                            sliderInput("slider", "Number of observations:", 0, 234, c(0, 100))
                                         )
                                     )
-                                    
-                                    # fluidRow(
-                                    #     box(title="Tornado Magnitudes by Year",
-                                    #         plotOutput("year_magnitude"), width=12)
-                                    # ),
-                                    # 
-                                    # fluidRow(
-                                    #     box(title="Tornado Magnitudes by Month",
-                                    #         plotOutput("month_magnitude"), width=12)
-                                    # ),
-                                    # 
-                                    # fluidRow(
-                                    #     box(title="Tornado Magnitudes by Hour",
-                                    #         plotOutput("hour_magnitude"), width=12)
-                                    # ),
-                                    # 
-                                    # fluidRow(
-                                    #     box(title="Tornado Magnitude by Distance",
-                                    #         plotOutput("distance_magnitude"), width=12),
-                                    # 
-                                    #     box(title = "Distance of Tornado in Miles",
-                                    #         sliderInput("slider", "Number of observations:", 0, 250, c(0, 100))
-                                    #     )
-                                    # )
-                                    
-                                    
                             ),
                             
                             tabItem(tabName="Damages"
@@ -135,6 +111,7 @@ ui <- dashboardPage(skin="black",
                             tabItem(tabName="Illinois"
                                     
                             ),
+                            
                             tabItem(tabName="TestLeaf",
                                     h2("Testing area for Leaflet Plotting"),
                                     fluidRow(
@@ -147,36 +124,36 @@ ui <- dashboardPage(skin="black",
                                         
                                         # Filter by Magnitude
                                         column(2,
-                                            checkboxGroupInput("magnitudeFilter",
-                                                h3("Filter by Magnitude"),
-                                                choices = list("-9" = -9, 
-                                                               "0" = 0, 
-                                                               "1" = 1, 
-                                                               "2" = 2, 
-                                                               "3" = 3, 
-                                                               "4" = 4,
-                                                               "5" = 5)
-                                            )
+                                               checkboxGroupInput("magnitudeFilter",
+                                                                  h3("Filter by Magnitude"),
+                                                                  choices = list("-9" = -9, 
+                                                                                 "0" = 0, 
+                                                                                 "1" = 1, 
+                                                                                 "2" = 2, 
+                                                                                 "3" = 3, 
+                                                                                 "4" = 4,
+                                                                                 "5" = 5)
+                                               )
                                         ),
                                         
                                         # Filter by Width
                                         column(2,
-                                            box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 4576))
+                                               box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 4576))
                                         ),
-
+                                        
                                         # Filter by Length
                                         column(2,
-                                            sliderInput("lengthSlider", "Filter By Length", 0, 234, 234)
+                                               sliderInput("lengthSlider", "Filter By Length", 0, 234, 234)
                                         ),
-
+                                        
                                         # Filter by Injuries
                                         column(2,
-                                            sliderInput("injurySlider", "Filter By Injuries", 0, 1740, 1740)
+                                               sliderInput("injurySlider", "Filter By Injuries", 0, 1740, 1740)
                                         ),
-
+                                        
                                         # Filter by Loss
                                         column(2,
-                                            sliderInput("lossSlider", "Filter By Losses", 0, 22000000, 0)
+                                               sliderInput("lossSlider", "Filter By Losses", 0, 22000000, 22000000)
                                         )
                                     ),
                                     
@@ -314,24 +291,24 @@ server <- function(input, output, session){
             dataset <- subset(dataset, mag %in% mag_filter)
             print(strtoi(input$magnitudeFilter))
         }
-
+        
         # Subset by Width
         wid_filter <- input$widthSlider
         dataset <- subset(dataset, wid < wid_filter)
-
+        
         # Subset by Length
         len_filter <- input$lengthSlider
         dataset <- subset(dataset, len < len_filter)
         print(len_filter)
-
+        
         # Subset by Injuries
         inj_filter <- input$injurySlider
         dataset <- subset(dataset, inj < inj_filter)
-
+        
         # Subset by Loss
         loss_filter <- input$lossSlider
         dataset <- subset(dataset, loss < loss_filter)
-
+        
         map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
             addTiles() %>% 
             addProviderTiles(providers$Stamen.TonerLite) %>%
