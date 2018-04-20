@@ -308,9 +308,36 @@ server <- function(input, output, session){
         loss_filter <- input$lossSlider
         dataset <- subset(dataset, loss < loss_filter)
         
+        
+        provider_tiles <- c("Stamen Toner", "Open Topo Map", "Thunderforest Landscape", "Esri World Imagery", "Stamen Watercolor")
+        
+        # Select Provider Tiles
+        if(input$MapSelect == "Stamen Toner"){
+            tiles <- providers$Stamen.Toner
+        }
+        else if(input$MapSelect == "Open Topo Map"){
+            tiles <- providers$OpenTopoMap
+            
+        }
+        else if(input$MapSelect == "Thunderforest Landscape"){
+            tiles <- providers$Thunderforest.Landscape
+            
+        }
+        else if(input$MapSelect == "Esri World Imagery"){
+            tiles <- providers$Esri.WorldImagery
+            
+        }
+        else if(input$MapSelect == "Stamen Watercolor"){
+            tiles <- providers$Stamen.Watercolor
+        }
+        else{
+            tiles <- providers$Stamen.Toner
+        }
+        
+        
         map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
             addTiles() %>% 
-            addProviderTiles(providers$Stamen.Toner) %>%
+            addProviderTiles(tiles) %>%
             setView(map, 
                     lng = state0()[,"x"],
                     lat = state0()[,"y"], 
