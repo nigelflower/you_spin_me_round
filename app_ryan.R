@@ -123,7 +123,16 @@ ui <- dashboardPage(skin="black",
                                 
                         ),
                         
-                        tabItem(tabName="Illinois"
+                        tabItem(tabName="Illinois",
+                                h2("Illinois"),
+                                fluidRow(
+                                  box(width = 12,
+                                      sliderInput(inputId = "iYear", label = "Year", min = 1950, max = 2016, value = 1950, step = 1, animate = TRUE, sep = ""),
+                                      sliderInput(inputId = 'iMonth', label = "Year", min = 1, max = 12, value = c(1,12), step = 1, animate = TRUE, sep = "")
+                                  )
+                                ),
+                                fluidRow()
+                                
                                 
                         ),
                         
@@ -151,22 +160,22 @@ ui <- dashboardPage(skin="black",
                                   
                                   # Filter by Width
                                   column(2,
-                                         box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 4576))
+                                         box(sliderInput("widthSlider", "Filter By Width", min = 0, max = 4576, c(0, 4576)))
                                   ),
                                   
                                   # Filter by Length
                                   column(2,
-                                         sliderInput("lengthSlider", "Filter By Length", 0, 234, 234)
+                                         sliderInput("lengthSlider", "Filter By Length", min = 0, max = 234, value = c(0,234))
                                   ),
                                   
                                   # Filter by Injuries
                                   column(2,
-                                         sliderInput("injurySlider", "Filter By Injuries", 0, 1740, 1740)
+                                         sliderInput("injurySlider", "Filter By Injuries", min = 0, max = 1740, value = c(0,1740))
                                   ),
                                   
                                   # Filter by Loss
                                   column(2,
-                                         sliderInput("lossSlider", "Filter By Losses", min = 0, max = 22000000, value = c(0,22000000))#, pre = "$", sep = "," )
+                                         sliderInput("lossSlider", "Filter By Losses", min = 0, max = 22000000, value = c(0,22000000), pre = "$", sep = "," )
                                   )
                                 ),
                                 
@@ -308,20 +317,25 @@ server <- function(input, output, session){
     }
     
     # Subset by Width
-    wid_filter <- input$widthSlider
-    dataset <- subset(dataset, wid < wid_filter)
+    wid_min <- input$widthSlider[1]
+    wid_max <- input$widthSlider[2]
+    dataset <- subset(dataset, wid >= wid_min, wid <= wid_max)
     
     # Subset by Length
-    len_filter <- input$lengthSlider
-    dataset <- subset(dataset, len < len_filter)
-    print(len_filter)
+    len_min <- input$lengthSlider[1]
+    len_max <- input$lengthSlider[2]
+    dataset <- subset(dataset, len >= len_min & len <= len_max)
+
     
     # Subset by Injuries
-    inj_filter <- input$injurySlider
-    dataset <- subset(dataset, inj < inj_filter)
+    inj_min <- input$injurySlider[1]
+    inj_max <- input$injurySlider[2]
+    dataset <- subset(dataset, inj >= inj_min & inj <= inj_max)
     
     # Subset by Loss
-    dataset <- subset(dataset, loss >= input$lossSlider[1] & loss <= input$lossSlider[2])
+    loss_min <- input$lossSlider[1]
+    loss_max <- input$lossSlider[2]
+    dataset <- subset(dataset, loss >= loss_min & loss <= loss_max)
     print(input$lossSlider[0],input$lossSlider[1])
     
     # Select Provider Tiles
