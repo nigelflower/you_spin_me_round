@@ -13,6 +13,26 @@ hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
 # Maybe add in Thunderforest.SpinalMap for fun....
 provider_tiles <- c("Stamen Toner", "Open Topo Map", "Thunderforest Landscape", "Esri World Imagery", "Stamen Watercolor")
 
+counties_names <- read.csv("counties.csv")
+
+IL_Code <- 17
+
+# Get IL tornadoes from file              
+illinois_tornadoes <- subset(tornadoes, stf == IL_Code)
+
+#combine all the tornadoes from the f1-f4 code counts excluding the 0th county
+illinois_counties <- as.data.frame(table(a = c(illinois_tornadoes[,"f1"], illinois_tornadoes[,"f2"], illinois_tornadoes[,"f3"], illinois_tornadoes[,"f4"])))
+illinois_counties <- illinois_counties[-c(1), ]
+names(illinois_counties) <- c("Code", "Frequency")
+
+# I cant convert the county number to name
+#
+#dataframe of counties with code
+# setDT(illinois_counties)
+# setDT(counties_names)
+#
+#illinois_counties[ counties_names, on = c("Code"), Code := i.County]
+
 ui <- dashboardPage(skin="black",
                     dashboardHeader(title = "You Spin me Round"),
                     
@@ -58,6 +78,14 @@ ui <- dashboardPage(skin="black",
                                     fluidRow(
                                         box(title="Percentage of Magnitudes by Year",
                                             plotOutput("year_magnitude_percentage"), width=12)
+                                    ),
+                                    fluidRow(
+                                      box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
+                                      dataTableOutput("countyTable"))
+                                    ),
+                                    fluidRow(
+                                      box(title = "Tornado Counties Graph", solidHeader = TRUE, status = "primary", width = 12,
+                                        plotOutput("countyChart"))
                                     )
                             ),
                             
@@ -372,6 +400,18 @@ server <- function(input, output, session){
         ggplot(data=melted_fymp, aes(x=Var1, y=value, color=factor(Var2))) + 
             geom_line(size=3) + xlab("Year") + ylab("Percentage of Magnitudes")
         
+    })
+    
+    output$countyTable <- renderDataTable({
+      datatable(illinois_counties, 
+                options = list(searching = FALSE, pageLength = 6, lengthChange = FALSE))
+    })
+    
+    
+    output$countyChart <- renderPlot({
+      ggplot(data = illinois_counties, aes(x=illinois_counties$Code, y=illinois_counties$Frequency))  +
+        geom_bar(position="dodge", stat="identity", fill = "orange") + labs(x="County Number", y = "# of Tornadoes") + theme(axis.text.x = element_text(angle = 70, vjust=0.5))
+
     })
 }
 
