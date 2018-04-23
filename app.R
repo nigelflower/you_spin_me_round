@@ -55,7 +55,8 @@ ui <- dashboardPage(skin="black",
                             ),
                             menuItem("Damages", tabName="Damages"),
                             menuItem("Illinois", tabName="Illinois"),
-                            menuItem("TestLeaf", tabName = "TestLeaf")
+                            menuItem("TestLeaf", tabName = "TestLeaf"),
+                            menuItem("Heatmap", tabName="Heatmap")
                         )
                     ),
                     
@@ -144,74 +145,74 @@ ui <- dashboardPage(skin="black",
                             ),
                             
                             tabItem(tabName="TestLeaf",
-                                    h2("Testing area for Leaflet Plotting"),
-                                    fluidRow(
-                                        box(width = 12,
-                                            sliderInput(inputId = "Slider0", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = "")
-                                        )
+                                h2("Testing area for Leaflet Plotting"),
+                                fluidRow(
+                                    box(width = 12,
+                                        sliderInput(inputId = "Slider0", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = "")
+                                    )
+                                ),
+                                
+                                fluidRow(
+                                    # Filter by Magnitude
+                                    column(2,
+                                           checkboxGroupInput("magnitudeFilter",
+                                                              h3("Filter by Magnitude"),
+                                                              choices = list("-9" = -9, 
+                                                                             "0" = 0, 
+                                                                             "1" = 1, 
+                                                                             "2" = 2, 
+                                                                             "3" = 3, 
+                                                                             "4" = 4,
+                                                                             "5" = 5))
                                     ),
                                     
-                                    fluidRow(
-                                        # Filter by Magnitude
-                                        column(2,
-                                               checkboxGroupInput("magnitudeFilter",
-                                                                  h3("Filter by Magnitude"),
-                                                                  choices = list("-9" = -9, 
-                                                                                 "0" = 0, 
-                                                                                 "1" = 1, 
-                                                                                 "2" = 2, 
-                                                                                 "3" = 3, 
-                                                                                 "4" = 4,
-                                                                                 "5" = 5))
-                                        ),
-                                        
-                                        # Filter by Width
-                                        column(2,
-                                               box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 4576))
-                                        ),
-                                        
-                                        # Filter by Length
-                                        column(2,
-                                               sliderInput("lengthSlider", "Filter By Length", 0, 234, 234)
-                                        ),
-                                        
-                                        # Filter by Injuries
-                                        column(2,
-                                               sliderInput("injurySlider", "Filter By Injuries", 0, 1740, 1740)
-                                        ),
-                                        
-                                        # Filter by Loss
-                                        column(2,
-                                               sliderInput("lossSlider", "Filter By Losses", 0, 22000000, 22000000)
-                                        )
+                                    # Filter by Width
+                                    column(2,
+                                           box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 4576))
                                     ),
                                     
-                                    fluidRow(
-                                        box(width = 6,
-                                            selectInput(inputId = "SelectState0", label = "State", choices = state.abb, selected = "IL"),
-                                            selectInput(inputId = "MapSelect", label="Select Map Type", choices = provider_tiles, selected="Stamen Toner"),
-                                            uiOutput("reset0"),
-                                            leafletOutput("Leaf0")
-                                        ),
-                                        box(width = 6,
-                                            selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
-                                            uiOutput("reset1"),
-                                            leafletOutput("Leaf1")
-                                        )
+                                    # Filter by Length
+                                    column(2,
+                                           sliderInput("lengthSlider", "Filter By Length", 0, 234, 234)
                                     ),
                                     
-                                    tabItem(tabName="Heatmap",
-                                            h2("Heatmap Plots for Illinois Tornadoes"),
-                                            
-                                            fluidRow(
-                                                box(title="Heatmap of Illinois Tornadoes Starting Point",
-                                                    selectInput(inputId="HeatmapState0", label="Select State", choices=state.abb, selected="IL"),
-                                                    leafletOutput("heatmap0"), width=6),
-                                                
-                                                box(title="Heatmap of Illinois Tornadoes Ending Point",
-                                                    selectInput(inputId="HeatmapState1", label="Select State", choices=state.abb, selected="IL"),
-                                                    leafletOutput("heatmap1"), width=6)
-                                            )
+                                    # Filter by Injuries
+                                    column(2,
+                                           sliderInput("injurySlider", "Filter By Injuries", 0, 1740, 1740)
+                                    ),
+                                    
+                                    # Filter by Loss
+                                    column(2,
+                                           sliderInput("lossSlider", "Filter By Losses", 0, 22000000, 22000000)
+                                    )
+                                ),
+                                
+                                fluidRow(
+                                    box(width = 6,
+                                        selectInput(inputId = "SelectState0", label = "State", choices = state.abb, selected = "IL"),
+                                        selectInput(inputId = "MapSelect", label="Select Map Type", choices = provider_tiles, selected="Stamen Toner"),
+                                        uiOutput("reset0"),
+                                        leafletOutput("Leaf0")
+                                    ),
+                                    box(width = 6,
+                                        selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
+                                        uiOutput("reset1"),
+                                        leafletOutput("Leaf1")
+                                    )
+                                )
+                            ),
+                            
+                            tabItem(tabName="Heatmap",
+                                    h2("Heatmap Plots for Illinois Tornadoes"),
+                                    
+                                    fluidRow(
+                                        box(title="Heatmap of Illinois Tornadoes Starting Point",
+                                            selectInput(inputId="HeatmapState0", label="Select State", choices=state.abb, selected="IL"),
+                                            leafletOutput("heatmap0"), width=6),
+                                        
+                                        box(title="Heatmap of Illinois Tornadoes Ending Point",
+                                            selectInput(inputId="HeatmapState1", label="Select State", choices=state.abb, selected="IL"),
+                                            leafletOutput("heatmap1"), width=6)
                                     )
                             )
                         )
@@ -410,6 +411,36 @@ server <- function(input, output, session){
             addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
             addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
         map
+    })
+    
+    output$heatmap0 <- renderLeaflet({
+        
+        # Subset by Year And State
+        dataset <- subset(tornadoes, st == input$HeatmapState0)
+        
+        map <- leaflet(dataset) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
+            setView(map, 
+                    lng = heatmapState0()[,"x"], 
+                    lat = heatmapState0()[,"y"], 
+                    zoom = 6) %>%
+            addHeatmap(lng = ~slon, lat = ~slat, intensity = ~mag, blur = 20,
+                       max = 0.001, radius = 8)
+        map
+    })
+    
+    output$heatmap1 <- renderLeaflet({
+        # Subset by Year And State
+        dataset <- subset(tornadoes, st == input$HeatmapState1)
+        
+        map <- leaflet(dataset) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
+            setView(map, 
+                    lng = heatmapState1()[,"x"], 
+                    lat = heatmapState1()[,"y"], 
+                    zoom = 6) %>%
+            addHeatmap(lng = ~elon, lat = ~elat, intensity = ~mag, blur = 20,
+                       max = 0.001, radius = 8)
+        map
+        
     })
     
     output$distance_magnitude_percentage <- renderPlot({
