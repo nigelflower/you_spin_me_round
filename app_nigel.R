@@ -9,7 +9,7 @@ library(reshape2)
 
 tornadoes <- read.csv("tornadoes.csv")
 magnitudes <-c("-9", "0", "1", "2", "3", "4", "5")
-hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
+hours <- strptime(tornadoes$time, "%H:%M:%S")
 
 # Maybe add in Thunderforest.SpinalMap for fun....
 provider_tiles <- c("Stamen Toner", "Open Topo Map", "Thunderforest Landscape", "Esri World Imagery", "Stamen Watercolor")
@@ -240,6 +240,19 @@ server <- function(input, output, session){
     
     output$hour_magnitude <- renderPlot({
         # hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
+        
+        # If the hour setting is on 24 Hours...
+        # if(input$hour_radio == 1){
+        #     hours <- hour(hours)
+        #     #hours <- hour(hours)
+        # }
+        # # If the hour setting is on 12 Hours...
+        # else{
+        #     hours <- format(hours, "%I:%M:%S %p")
+        # }
+        
+        hours <- hour(hours)
+        
         hour_mag <- data.frame(table(hours, tornadoes$mag))
         ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
             theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
@@ -250,6 +263,9 @@ server <- function(input, output, session){
     
     output$hour_magnitude_percentage <- renderPlot({
         # hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
+        
+        hours <- hour(hours)
+        
         hour_mag_per <- data.frame(t(apply(table(hours, tornadoes$mag), 1, function(i) i / sum(i))))
         colnames(hour_mag_per) <- magnitudes
         melted_hmp <- melt(as.matrix(hour_mag_per))
