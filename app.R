@@ -10,6 +10,7 @@ tornadoes <- read.csv("tornadoes.csv")
 magnitudes <-c("-9", "0", "1", "2", "3", "4", "5")
 hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
 
+
 # Ryan's variables pre-server
 
 # Read in lat/lon of each state's center
@@ -20,10 +21,28 @@ states[state.abb == "AK",][4] <- 64.2008
 states[state.abb == "HI",][3] <- -155.5828
 states[state.abb == "HI",][4] <- 19.8968
 
-iData <- subset(tornadoes, st == "IL")
-
 # Maybe add in Thunderforest.SpinalMap for fun....
 provider_tiles <- c("Stamen Toner", "Open Topo Map", "Thunderforest Landscape", "Esri World Imagery", "Stamen Watercolor")
+
+counties_names <- read.csv("counties.csv")
+
+IL_Code <- 17
+
+# Get IL tornadoes from file              
+illinois_tornadoes <- subset(tornadoes, stf == IL_Code)
+
+#combine all the tornadoes from the f1-f4 code counts excluding the 0th county
+illinois_counties <- as.data.frame(table(a = c(illinois_tornadoes[,"f1"], illinois_tornadoes[,"f2"], illinois_tornadoes[,"f3"], illinois_tornadoes[,"f4"])))
+illinois_counties <- illinois_counties[-c(1), ]
+names(illinois_counties) <- c("Code", "Frequency")
+
+# I cant convert the county number to name
+#
+#dataframe of counties with code
+# setDT(illinois_counties)
+# setDT(counties_names)
+#
+#illinois_counties[ counties_names, on = c("Code"), Code := i.County]
 
 ui <- dashboardPage(skin="black",
                     dashboardHeader(title = "You Spin me Round"),
@@ -47,7 +66,8 @@ ui <- dashboardPage(skin="black",
                         ),
                         menuItem("Damages", tabName="Damages"),
                         menuItem("Illinois", tabName="Illinois"),
-                        menuItem("TestLeaf", tabName = "TestLeaf")
+                        menuItem("TestLeaf", tabName = "TestLeaf"),
+                        menuItem("Heatmap", tabName="Heatmap")
                       )
                     ),
                     
@@ -70,6 +90,14 @@ ui <- dashboardPage(skin="black",
                                 fluidRow(
                                   box(title="Percentage of Magnitudes by Year",
                                       plotOutput("year_magnitude_percentage"), width=12)
+                                ),
+                                fluidRow(
+                                  box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
+                                      dataTableOutput("countyTable"))
+                                ),
+                                fluidRow(
+                                  box(title = "Tornado Counties Graph", solidHeader = TRUE, status = "primary", width = 12,
+                                      plotOutput("countyChart"))
                                 )
                         ),
                         
@@ -192,11 +220,24 @@ ui <- dashboardPage(skin="black",
                                       leafletOutput("Leaf1")
                                   )
                                 )
+                        ),
+                        tabItem(tabName="Heatmap",
+                                h2("Heatmap Plots for Illinois Tornadoes"),
+                                
+                                fluidRow(
+                                  box(title="Heatmap of Illinois Tornadoes Starting Point",
+                                      selectInput(inputId="HeatmapState0", label="Select State", choices=state.abb, selected="IL"),
+                                      leafletOutput("heatmap0"), width=6),
+                                  
+                                  box(title="Heatmap of Illinois Tornadoes Ending Point",
+                                      selectInput(inputId="HeatmapState1", label="Select State", choices=state.abb, selected="IL"),
+                                      leafletOutput("heatmap1"), width=6)
+                                )
                         )
                       )
-                    )
-)
 
+                )
+)
 
 server <- function(input, output, session){
   
@@ -227,6 +268,7 @@ server <- function(input, output, session){
       xlab("Month") + ylab("Total Tornadoes") + 
       guides(fill=guide_legend(title="Magnitude"))
     
+
   })
   
   output$month_magnitude_percentage <- renderPlot({
@@ -270,11 +312,10 @@ server <- function(input, output, session){
       guides(fill=guide_legend(title="Magnitude"))
   })
   
-  
   # Ryan Leaflet Server Code
   
   # TODO: clean Reactive Variables
-  s0Data <- reactive({
+  reactiveData <- reactive({
     # Things to constrain by:
     #  Year
     #  width
@@ -285,17 +326,20 @@ server <- function(input, output, session){
     
     dataset <- subset()
   })
-  s1Data<- reactive({
-    
-  })
-  
-  
   # Variables for selecting state and lat/lon (separate from tornado dataset)
   state0 <- reactive({
     states[state.abb == input$SelectState0,]
   })
   state1 <- reactive({
     states[state.abb == input$SelectState1,]
+  })
+  
+  heatmapState0 <- reactive({
+    states[state.abb == input$HeatmapState0,]
+  })
+  
+  heatmapState1 <- reactive({
+    states[state.abb == input$HeatmapState1,]
   })
   
   
@@ -405,6 +449,49 @@ server <- function(input, output, session){
       geom_line(size=3) + xlab("Year") + ylab("Percentage of Magnitudes")
     
   })
+  
+    
+    output$heatmap0 <- renderLeaflet({
+        
+        # Subset by Year And State
+        dataset <- subset(tornadoes, st == input$HeatmapState0)
+        
+        map <- leaflet(dataset) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
+            setView(map, 
+                    lng = heatmapState0()[,"x"], 
+                    lat = heatmapState0()[,"y"], 
+                    zoom = 6) %>%
+            addHeatmap(lng = ~slon, lat = ~slat, intensity = ~mag, blur = 20,
+                       max = 0.001, radius = 8)
+        map
+    })
+    
+    output$heatmap1 <- renderLeaflet({
+        # Subset by Year And State
+        dataset <- subset(tornadoes, st == input$HeatmapState1)
+        
+        map <- leaflet(dataset) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
+            setView(map, 
+                    lng = heatmapState1()[,"x"], 
+                    lat = heatmapState1()[,"y"], 
+                    zoom = 6) %>%
+            addHeatmap(lng = ~elon, lat = ~elat, intensity = ~mag, blur = 20,
+                       max = 0.001, radius = 8)
+        map
+        
+    })
+    
+    output$countyTable <- renderDataTable({
+      datatable(illinois_counties, 
+                options = list(searching = FALSE, pageLength = 6, lengthChange = FALSE))
+    })
+    
+    
+    output$countyChart <- renderPlot({
+      ggplot(data = illinois_counties, aes(x=illinois_counties$Code, y=illinois_counties$Frequency))  +
+        geom_bar(position="dodge", stat="identity", fill = "orange") + labs(x="County Number", y = "# of Tornadoes") + theme(axis.text.x = element_text(angle = 70, vjust=0.5))
+
+    })
 }
 
 shinyApp(ui, server)
