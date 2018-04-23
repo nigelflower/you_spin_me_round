@@ -318,6 +318,13 @@ server <- function(input, output, session){
         states[state.abb == input$SelectState1,]
     })
     
+    heatmapState0 <- reactive({
+        states[state.abb == input$HeatmapState0,]
+    })
+    
+    heatmapState1 <- reactive({
+        states[state.abb == input$HeatmapState1,]
+    })
     
     # Plot output
     output$Leaf0 <- renderLeaflet({
