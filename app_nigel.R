@@ -1,4 +1,5 @@
 library(leaflet)
+library(leaflet.extras)
 library(ggplot2)
 library(lubridate)
 library(shiny)
@@ -35,7 +36,8 @@ ui <- dashboardPage(skin="black",
                             ),
                             menuItem("Damages", tabName="Damages"),
                             menuItem("Illinois", tabName="Illinois"),
-                            menuItem("TestLeaf", tabName = "TestLeaf")
+                            menuItem("TestLeaf", tabName = "TestLeaf"),
+                            menuItem("Heatmap", tabName="Heatmap")
                         )
                     ),
                     
@@ -171,6 +173,20 @@ ui <- dashboardPage(skin="black",
                                         leafletOutput("Leaf1")
                                     )
                                 )
+                            ),
+                            
+                            tabItem(tabName="Heatmap",
+                                    h2("Testing area for Heatmap Plotting"),
+
+                                    fluidRow(
+                                        box(title="Heatmap of Illinois Tornadoes Starting Point",
+                                            selectInput(inputId="HeatmapState0", label="Select State", choices=state.abb, selected="IL"),
+                                            leafletOutput("heatmap0"), width=6),
+                                        
+                                        box(title="Heatmap of Illinois Tornadoes Ending Point",
+                                            selectInput(inputId="HeatmapState1", label="Select State", choices=state.abb, selected="IL"),
+                                            leafletOutput("heatmap1"), width=6)
+                                    )
                             )
                         )
                     )
@@ -276,6 +292,13 @@ server <- function(input, output, session){
         states[state.abb == input$SelectState1,]
     })
     
+    heatmapState0 <- reactive({
+        states[state.abb == input$HeatmapState0,]
+    })
+    
+    heatmapState1 <- reactive({
+        states[state.abb == input$HeatmapState1,]
+    })
     
     # Plot output
     output$Leaf0 <- renderLeaflet({
@@ -361,6 +384,36 @@ server <- function(input, output, session){
             addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
             addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
         map
+    })
+    
+    output$heatmap0 <- renderLeaflet({
+        
+        # Subset by Year And State
+        dataset <- subset(tornadoes, st == input$HeatmapState0)
+        
+        map <- leaflet(dataset) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
+            setView(map, 
+                    lng = heatmapState0()[,"x"], 
+                    lat = heatmapState0()[,"y"], 
+                    zoom = 6) %>%
+            addHeatmap(lng = ~slon, lat = ~slat, intensity = ~mag, blur = 20,
+                       max = 0.001, radius = 8)
+        map
+    })
+    
+    output$heatmap1 <- renderLeaflet({
+        # Subset by Year And State
+        dataset <- subset(tornadoes, st == input$HeatmapState1)
+        
+        map <- leaflet(dataset) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
+            setView(map, 
+                    lng = heatmapState1()[,"x"], 
+                    lat = heatmapState1()[,"y"], 
+                    zoom = 6) %>%
+            addHeatmap(lng = ~elon, lat = ~elat, intensity = ~mag, blur = 20,
+                       max = 0.001, radius = 8)
+        map
+        
     })
     
     output$distance_magnitude_percentage <- renderPlot({
