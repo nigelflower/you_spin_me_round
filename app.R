@@ -198,6 +198,20 @@ ui <- dashboardPage(skin="black",
                                             uiOutput("reset1"),
                                             leafletOutput("Leaf1")
                                         )
+                                    ),
+                                    
+                                    tabItem(tabName="Heatmap",
+                                            h2("Heatmap Plots for Illinois Tornadoes"),
+                                            
+                                            fluidRow(
+                                                box(title="Heatmap of Illinois Tornadoes Starting Point",
+                                                    selectInput(inputId="HeatmapState0", label="Select State", choices=state.abb, selected="IL"),
+                                                    leafletOutput("heatmap0"), width=6),
+                                                
+                                                box(title="Heatmap of Illinois Tornadoes Ending Point",
+                                                    selectInput(inputId="HeatmapState1", label="Select State", choices=state.abb, selected="IL"),
+                                                    leafletOutput("heatmap1"), width=6)
+                                            )
                                     )
                             )
                         )
