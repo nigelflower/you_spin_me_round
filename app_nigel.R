@@ -243,11 +243,12 @@ server <- function(input, output, session){
         
         # If the hour setting is on 24 Hours...
         if(input$hour_radio == 1){
-            hours <- format(hours, "%H")
+            hours <- factor(format(hours, "%H"))
         }
         # If the hour setting is on 12 Hours...
         else{
-            hours <- format(hours, "%I %p")
+            hours <- factor(format(hours, "%I %p"), levels=c("12 AM", "01 AM", "02 AM", "03 AM", "04 AM", "05 AM", "06 AM", "07 AM", "08 AM", "09 AM", "10 AM", "11 AM", 
+                                                             "12 PM", "01 PM", "02 PM", "03 PM", "04 PM", "05 PM", "06 PM", "07 PM", "08 PM", "09 PM", "10 PM", "11 PM"))
         }
         
         hour_mag <- data.frame(table(hours, tornadoes$mag))
