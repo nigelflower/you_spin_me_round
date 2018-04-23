@@ -177,16 +177,15 @@ ui <- dashboardPage(skin="black",
                             
                             tabItem(tabName="Heatmap",
                                     h2("Testing area for Heatmap Plotting"),
+
                                     fluidRow(
-                                        box(width = 12,
-                                            sliderInput(inputId = "HeatmapYearSlider", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = "")
-                                        )
-                                    ),
-                                    
-                                    fluidRow(
-                                        box(title="Heatmap of Illinois Tornadoes",
-                                            selectInput(inputId="HeatmapState", label="Select State", choices=state.abb, selected="IL"),
-                                            leafletOutput("heatmap"), width=12)
+                                        box(title="Heatmap of Illinois Tornadoes Starting Point",
+                                            selectInput(inputId="HeatmapState0", label="Select State", choices=state.abb, selected="IL"),
+                                            leafletOutput("heatmap0"), width=6),
+                                        
+                                        box(title="Heatmap of Illinois Tornadoes Ending Point",
+                                            selectInput(inputId="HeatmapState1", label="Select State", choices=state.abb, selected="IL"),
+                                            leafletOutput("heatmap1"), width=6)
                                     )
                             )
                         )
@@ -293,10 +292,13 @@ server <- function(input, output, session){
         states[state.abb == input$SelectState1,]
     })
     
-    heatmapState <- reactive({
-        states[state.abb == input$HeatmapState,]
+    heatmapState0 <- reactive({
+        states[state.abb == input$HeatmapState0,]
     })
     
+    heatmapState1 <- reactive({
+        states[state.abb == input$HeatmapState1,]
+    })
     
     # Plot output
     output$Leaf0 <- renderLeaflet({
@@ -384,25 +386,34 @@ server <- function(input, output, session){
         map
     })
     
-    output$heatmap <- renderLeaflet({
+    output$heatmap0 <- renderLeaflet({
         
         # Subset by Year And State
-        dataset <- subset(tornadoes, st == input$HeatmapState)
-        dataset <- subset(dataset, yr == input$HeatmapYearSlider)
+        dataset <- subset(tornadoes, st == input$HeatmapState0)
         
-        map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
-            addTiles() %>% 
-            
-            # Select leaflet provider tiles from user input
-            addProviderTiles(providers$Stamen.TonerLite) %>%
-            
+        map <- leaflet(dataset) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
             setView(map, 
-                    lng = state1()[,"x"], 
-                    lat = state1()[,"y"], 
+                    lng = heatmapState0()[,"x"], 
+                    lat = heatmapState0()[,"y"], 
                     zoom = 6) %>%
-            addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
-            addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
+            addHeatmap(lng = ~slon, lat = ~slat, intensity = ~mag, blur = 20,
+                       max = 0.001, radius = 8)
         map
+    })
+    
+    output$heatmap1 <- renderLeaflet({
+        # Subset by Year And State
+        dataset <- subset(tornadoes, st == input$HeatmapState1)
+        
+        map <- leaflet(dataset) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
+            setView(map, 
+                    lng = heatmapState1()[,"x"], 
+                    lat = heatmapState1()[,"y"], 
+                    zoom = 6) %>%
+            addHeatmap(lng = ~elon, lat = ~elat, intensity = ~mag, blur = 20,
+                       max = 0.001, radius = 8)
+        map
+        
     })
     
     output$distance_magnitude_percentage <- renderPlot({
