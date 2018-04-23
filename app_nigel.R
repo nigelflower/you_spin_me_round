@@ -242,14 +242,13 @@ server <- function(input, output, session){
         # hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
         
         # If the hour setting is on 24 Hours...
-        # if(input$hour_radio == 1){
-        #     hours <- hour(hours)
-        #     #hours <- hour(hours)
-        # }
-        # # If the hour setting is on 12 Hours...
-        # else{
-        #     hours <- format(hours, "%I:%M:%S %p")
-        # }
+        if(input$hour_radio == 1){
+            hours <- hour(hours)
+        }
+        # If the hour setting is on 12 Hours...
+        else{
+            hours <- format(hours, "%I:%M:%S %p")
+        }
         
         hours <- hour(hours)
         
