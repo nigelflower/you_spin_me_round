@@ -243,14 +243,12 @@ server <- function(input, output, session){
         
         # If the hour setting is on 24 Hours...
         if(input$hour_radio == 1){
-            hours <- hour(hours)
+            hours <- format(hours, "%H")
         }
         # If the hour setting is on 12 Hours...
         else{
-            hours <- format(hours, "%I:%M:%S %p")
+            hours <- format(hours, "%I %p")
         }
-        
-        hours <- hour(hours)
         
         hour_mag <- data.frame(table(hours, tornadoes$mag))
         ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
