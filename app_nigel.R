@@ -1,4 +1,5 @@
 library(leaflet)
+library(leaflet.extras)
 library(ggplot2)
 library(lubridate)
 library(shiny)
@@ -35,7 +36,8 @@ ui <- dashboardPage(skin="black",
                             ),
                             menuItem("Damages", tabName="Damages"),
                             menuItem("Illinois", tabName="Illinois"),
-                            menuItem("TestLeaf", tabName = "TestLeaf")
+                            menuItem("TestLeaf", tabName = "TestLeaf"),
+                            menuItem("Heatmap", tabName="Heatmap")
                         )
                     ),
                     
@@ -171,6 +173,21 @@ ui <- dashboardPage(skin="black",
                                         leafletOutput("Leaf1")
                                     )
                                 )
+                            ),
+                            
+                            tabItem(tabName="Heatmap",
+                                    h2("Testing area for Heatmap Plotting"),
+                                    fluidRow(
+                                        box(width = 12,
+                                            sliderInput(inputId = "HeatmapYearSlider", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = "")
+                                        )
+                                    ),
+                                    
+                                    fluidRow(
+                                        box(title="Heatmap of Illinois Tornadoes",
+                                            selectInput(inputId="HeatmapState", label="Select State", choices=state.abb, selected="IL"),
+                                            leafletOutput("heatmap"), width=12)
+                                    )
                             )
                         )
                     )
@@ -276,6 +293,10 @@ server <- function(input, output, session){
         states[state.abb == input$SelectState1,]
     })
     
+    heatmapState <- reactive({
+        states[state.abb == input$HeatmapState,]
+    })
+    
     
     # Plot output
     output$Leaf0 <- renderLeaflet({
@@ -348,6 +369,27 @@ server <- function(input, output, session){
         
         dataset <- subset(tornadoes, st == input$SelectState1)
         dataset <- subset(dataset, yr == input$Slider0)
+        map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
+            addTiles() %>% 
+            
+            # Select leaflet provider tiles from user input
+            addProviderTiles(providers$Stamen.TonerLite) %>%
+            
+            setView(map, 
+                    lng = state1()[,"x"], 
+                    lat = state1()[,"y"], 
+                    zoom = 6) %>%
+            addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
+            addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
+        map
+    })
+    
+    output$heatmap <- renderLeaflet({
+        
+        # Subset by Year And State
+        dataset <- subset(tornadoes, st == input$HeatmapState)
+        dataset <- subset(dataset, yr == input$HeatmapYearSlider)
+        
         map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
             addTiles() %>% 
             
