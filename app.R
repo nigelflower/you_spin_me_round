@@ -12,7 +12,7 @@ hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
 
 # Maybe add in Thunderforest.SpinalMap for fun....
 provider_tiles <- c("Stamen Toner", "Open Topo Map", "Thunderforest Landscape", "Esri World Imagery", "Stamen Watercolor")
-
+    
 counties_names <- read.csv("counties.csv")
 
 IL_Code <- 17

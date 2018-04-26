@@ -176,17 +176,17 @@ ui <- dashboardPage(skin="black",
                             ),
                             
                             tabItem(tabName="Heatmap",
-                                    h2("Testing area for Heatmap Plotting"),
+                                h2("Testing area for Heatmap Plotting"),
 
-                                    fluidRow(
-                                        box(title="Heatmap of Illinois Tornadoes Starting Point",
-                                            selectInput(inputId="HeatmapState0", label="Select State", choices=state.abb, selected="IL"),
-                                            leafletOutput("heatmap0"), width=6),
-                                        
-                                        box(title="Heatmap of Illinois Tornadoes Ending Point",
-                                            selectInput(inputId="HeatmapState1", label="Select State", choices=state.abb, selected="IL"),
-                                            leafletOutput("heatmap1"), width=6)
-                                    )
+                                fluidRow(
+                                    box(title="Heatmap of Illinois Tornadoes Starting Point",
+                                        selectInput(inputId="HeatmapState0", label="Select State", choices=state.abb, selected="IL"),
+                                        leafletOutput("heatmap0"), width=6),
+                                    
+                                    box(title="Heatmap of Illinois Tornadoes Ending Point",
+                                        selectInput(inputId="HeatmapState1", label="Select State", choices=state.abb, selected="IL"),
+                                        leafletOutput("heatmap1"), width=6)
+                                )
                             )
                         )
                     )
@@ -239,38 +239,51 @@ server <- function(input, output, session){
     })
     
     output$hour_magnitude <- renderPlot({
-        # hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
-        
-        # If the hour setting is on 24 Hours...
         if(input$hour_radio == 1){
             hours <- factor(format(hours, "%H"))
+            hour_mag <- data.frame(table(hours, tornadoes$mag))
+            ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
+                theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+                xlab("Hour of Day") + ylab("Total Tornadoes") + 
+                guides(fill=guide_legend(title="Magnitude"))
         }
-        # If the hour setting is on 12 Hours...
         else{
-            hours <- factor(format(hours, "%I %p"), levels=c("12 AM", "01 AM", "02 AM", "03 AM", "04 AM", "05 AM", "06 AM", "07 AM", "08 AM", "09 AM", "10 AM", "11 AM", 
-                                                             "12 PM", "01 PM", "02 PM", "03 PM", "04 PM", "05 PM", "06 PM", "07 PM", "08 PM", "09 PM", "10 PM", "11 PM"))
+            hours <- format(strptime(tornadoes$time, "%H:%M:%S"), "%I %p")
+            hour_mag <- data.frame(table(hours, tornadoes$mag))
+            ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=factor(Var2))) + geom_bar(stat="identity") +
+                theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+                xlab("Hour of Day") + ylab("Total Tornadoes") + 
+                guides(fill=guide_legend(title="Magnitude")) 
         }
-        
-        hour_mag <- data.frame(table(hours, tornadoes$mag))
-        ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
-            theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
-            xlab("Hour of Day") + ylab("Total Tornadoes") + 
-            guides(fill=guide_legend(title="Magnitude"))
-        
     })
     
     output$hour_magnitude_percentage <- renderPlot({
-        # hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
         
-        hours <- hour(hours)
-        
+        hours <- factor(format(hours, "%H"))
         hour_mag_per <- data.frame(t(apply(table(hours, tornadoes$mag), 1, function(i) i / sum(i))))
         colnames(hour_mag_per) <- magnitudes
         melted_hmp <- melt(as.matrix(hour_mag_per))
         
-        ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
-            xlab("Hours") + ylab("Percentage of Magnitudes") +
-            guides(fill=guide_legend(title="Magnitude"))
+        if( input$hour_radio == 1){
+            ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
+                xlab("Hours") + ylab("Percentage of Magnitudes") +
+                guides(fill=guide_legend(title="Magnitude")) +
+                scale_x_continuous(limits=c(0,23),
+                                   breaks=0:11*2,
+                                   labels=c(0:11*2)) 
+            
+        }
+        else{
+            ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
+                xlab("Hours") + ylab("Percentage of Magnitudes") +
+                guides(fill=guide_legend(title="Magnitude")) +
+                scale_x_continuous(limits=c(0,24),
+                                   breaks=0:12*2,
+                                   labels=c(paste(0:5*2,"am"),
+                                            "12 pm",
+                                            paste(7:11*2-12,"pm"), 
+                                            "0 am")) 
+        }
     })
     
     output$distance_magnitude <- renderPlot({
