@@ -5,6 +5,7 @@ library(shiny)
 library(shinydashboard)
 library(maps)
 library(reshape2)
+library(DT)
 
 tornadoes <- read.csv("tornadoes.csv")
 magnitudes <-c("-9", "0", "1", "2", "3", "4", "5")
@@ -25,13 +26,7 @@ illinois_counties <- as.data.frame(table(a = c(illinois_tornadoes[,"f1"], illino
 illinois_counties <- illinois_counties[-c(1), ]
 names(illinois_counties) <- c("Code", "Frequency")
 
-# I cant convert the county number to name
-#
-#dataframe of counties with code
-# setDT(illinois_counties)
-# setDT(counties_names)
-#
-#illinois_counties[ counties_names, on = c("Code"), Code := i.County]
+countyInfo <- data.frame(County=counties_names$County, Frequency= illinois_counties$Frequency)
 
 ui <- dashboardPage(skin="black",
                     dashboardHeader(title = "You Spin me Round"),
@@ -456,13 +451,13 @@ server <- function(input, output, session){
     
     output$countyTable <- renderDataTable({
         datatable(illinois_counties, 
-                  options = list(searching = FALSE, pageLength = 6, lengthChange = FALSE))
+                  options = list(searching = FALSE, pageLength = 8, lengthChange = FALSE))
     })
     
     
     output$countyChart <- renderPlot({
-        ggplot(data = illinois_counties, aes(x=illinois_counties$Code, y=illinois_counties$Frequency))  +
-            geom_bar(position="dodge", stat="identity", fill = "orange") + labs(x="County Number", y = "# of Tornadoes") + theme(axis.text.x = element_text(angle = 70, vjust=0.5))
+        ggplot(data = countyInfo, aes(x=countyInfo$County, y=countyInfo$Frequency))  +
+            geom_bar(position="dodge", stat="identity", fill = "orange") + labs(x="County", y = "# of Tornadoes") + theme(axis.text.x = element_text(angle = 90, vjust=0.5))
         
     })
 }
