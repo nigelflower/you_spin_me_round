@@ -26,7 +26,7 @@ tornadoes$countyName <- fipsIllinois$County.Name[match(tornadoes$f1, fipsIllinoi
 tornadoes$countyName <- tolower(tornadoes$countyName)
 
 #illinois = illinois[!duplicated(illinois$subregion),]
-tornadoes <- merge(illinois, tornadoes, by.x = "subregion", by.y = "countyName")
+tornadoesWithFips <- merge(illinois, tornadoes, by.x = "subregion", by.y = "countyName")
 
 #Changing the data for loss column of tornadoes to be categorical 0-7
 tornadoes$loss <- ifelse(tornadoes$yr >= 2016, 
@@ -312,8 +312,10 @@ dynamic_line_chart <- function(data, x_axis, y_axis1, label1, y_axis2, label2,
 # tornadoes of each magnitude) on a per county basis for all the Illinois 
 # counties on the map
 
-countyInj <- aggregate(inj ~ subregion + lat + long + group + order, tornadoes, sum)
+countyInj <- aggregate(inj ~ subregion + lat + long + group + order, tornadoesWithFips, sum)
 countyInj<- countyInj[order(countyInj$order),] 
+countyInjuriesMap <- ggplot(countyInj, aes(x = countyInj$long, y = countyInj$lat, group = group, fill = inj)) + geom_polygon(color='black')
+ggplotly(countyInjuriesMap)
 
 
 p <- x %>%
@@ -335,13 +337,17 @@ p <- x %>%
                  zeroline = FALSE, showticklabels = FALSE)
   )
 
-countyInjuriesMap <- ggplot(countyInj, aes(x = countyInj$long, y = countyInj$lat, group = group, fill = inj)) + geom_polygon(color='black')
 
 
-countyDeaths <- aggregate(fat ~ subregion + lat + long + group + order, tornadoes, sum)
+countyDeaths <- aggregate(fat ~ subregion + lat + long + group + order, tornadoesWithFips, sum)
 countyDeaths <- countyDeaths[order(countyDeaths$order),] 
 countyDeathsMap <- ggplot(countyDeaths, aes(x = countyDeaths$long, y = countyDeaths$lat, group = group, fill = fat)) + geom_polygon(color='black')
+ggplotly(countyDeathsMap)
 
+countyLoss <- tornadoesWithFips
+countyLoss <- countyLoss[order(countyLoss$order),] 
+countyLossMap <- ggplot(countyLoss, aes(x = countyLoss$long, y = countyLoss$lat, group = group, fill = loss)) + geom_polygon(color='black')
+ggplotly(countyLossMap)
 
 # 2.) allow a user to compare the Illinois tabular data to data from any other 
 # state that the user chooses (from a list of all 50 states) in tabular form
