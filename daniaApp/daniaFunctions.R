@@ -13,9 +13,21 @@ library(plotly)
 
 setwd("~/Documents/Github/you_spin_me_round/daniaApp")
 
+fips <- read.csv(file="US_FIPS_Codes.csv", header=TRUE, sep=",")
+fipsIllinois <- subset(fips, State == "Illinois")
+
+illinois <- map_data("county") %>%
+  filter(region == 'illinois')
+
 tornadoes <- read.csv("tornadoes.csv")
 tornadoes <- subset(tornadoes, st == "IL")
 tornadoes$hr <- as.POSIXlt(tornadoes$time, format="%H:%M")$hour
+tornadoes$countyName <- fipsIllinois$County.Name[match(tornadoes$f1, fipsIllinois$FIPS.County)]
+tornadoes$countyName <- tolower(tornadoes$countyName)
+
+#illinois = illinois[!duplicated(illinois$subregion),]
+tornadoes <- merge(illinois, tornadoes, by.x = "subregion", by.y = "countyName")
+
 #Changing the data for loss column of tornadoes to be categorical 0-7
 tornadoes$loss <- ifelse(tornadoes$yr >= 2016, 
                         (ifelse(tornadoes$loss >  0 & tornadoes$loss < 5000,1,
@@ -300,6 +312,36 @@ dynamic_line_chart <- function(data, x_axis, y_axis1, label1, y_axis2, label2,
 # tornadoes of each magnitude) on a per county basis for all the Illinois 
 # counties on the map
 
+countyInj <- aggregate(inj ~ subregion + lat + long + group + order, tornadoes, sum)
+countyInj<- countyInj[order(countyInj$order),] 
+
+
+p <- x %>%
+  group_by(group) %>%
+  plot_ly(x = ~long, y = ~lat, color = ~Injuries, colors = c('#ffffff','#000000'),  
+          hoverinfo = 'text', text = ~subregion) %>%
+  add_polygons(line = list(width = 0.4)) %>%
+  add_polygons(
+    fillcolor = 'transparent',
+    line = list(color = 'black', width = 0.5),
+    showlegend = FALSE
+  ) %>%
+  layout(
+    title = "Illinois Injuries by County",
+    titlefont = list(size = 10),
+    xaxis = list(title = "", showgrid = FALSE,
+                 zeroline = FALSE, showticklabels = FALSE),
+    yaxis = list(title = "", showgrid = FALSE,
+                 zeroline = FALSE, showticklabels = FALSE)
+  )
+
+countyInjuriesMap <- ggplot(countyInj, aes(x = countyInj$long, y = countyInj$lat, group = group, fill = inj)) + geom_polygon(color='black')
+
+
+countyDeaths <- aggregate(fat ~ subregion + lat + long + group + order, tornadoes, sum)
+countyDeaths <- countyDeaths[order(countyDeaths$order),] 
+countyDeathsMap <- ggplot(countyDeaths, aes(x = countyDeaths$long, y = countyDeaths$lat, group = group, fill = fat)) + geom_polygon(color='black')
+
 
 # 2.) allow a user to compare the Illinois tabular data to data from any other 
 # state that the user chooses (from a list of all 50 states) in tabular form
@@ -323,4 +365,5 @@ dynamic_line_chart <- function(data, x_axis, y_axis1, label1, y_axis2, label2,
 # 2.) use the data to create a heat map for Illinois showing where it is more 
 # or less safe to be regarding tornadoes
 
-
+gcounty <- map_data("county")
+head(gcounty)
