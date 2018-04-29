@@ -135,7 +135,24 @@ ui <- dashboardPage(skin="black",
                                     
                             ),
                             
-                            tabItem(tabName="Illinois"
+                            tabItem(tabName="Illinois",
+                                    fluidRow(
+                                      box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
+                                          dataTableOutput("countyTable"))
+                                    ),
+                                    
+                                    fluidRow(
+                                      box(title = "Tornado Counties Graph", solidHeader = TRUE, status = "primary", width = 12,
+                                          plotOutput("countyChart"))
+                                    ),
+                                    
+                                    fluidRow(
+                                      box(title = "Illinois 10 most destructive tornadoes", solidHeader = TRUE, status = "primary", width = 12,
+                                          #selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
+                                          uiOutput("reset2"),
+                                          leafletOutput("Leaf10Most")
+                                      )
+                                    )
                                     
                             ),
                             
@@ -324,88 +341,119 @@ server <- function(input, output, session){
     
     # Plot output
     output$Leaf0 <- renderLeaflet({
-        # Subset by Year And State
-        dataset <- subset(tornadoes, st == input$SelectState0)
-        dataset <- subset(dataset, yr <= input$Slider0)
+      # Subset by Year And State
+      dataset <- subset(tornadoes, st == input$SelectState0)
+      dataset <- subset(dataset, yr <= input$Slider0)
+      
+      # Subset by Magnitude
+      mag_filter <- input$magnitudeFilter
+      
+      if(!is.null(mag_filter)){
+        dataset <- subset(dataset, mag %in% mag_filter)
+        print(strtoi(input$magnitudeFilter))
+      }
+      
+      # Subset by Width
+      wid_filter <- input$widthSlider
+      dataset <- subset(dataset, wid < wid_filter)
+      
+      # Subset by Length
+      len_filter <- input$lengthSlider
+      dataset <- subset(dataset, len < len_filter)
+      print(len_filter)
+      
+      # Subset by Injuries
+      inj_filter <- input$injurySlider
+      dataset <- subset(dataset, inj < inj_filter)
+      
+      # Subset by Loss
+      loss_filter <- input$lossSlider
+      dataset <- subset(dataset, loss < loss_filter)
+      
+      # Select Provider Tiles
+      if(input$MapSelect == "Stamen Toner"){
+        tiles <- providers$Stamen.Toner
+      }
+      else if(input$MapSelect == "Open Topo Map"){
+        tiles <- providers$OpenTopoMap
         
-        # Subset by Magnitude
-        mag_filter <- input$magnitudeFilter
+      }
+      else if(input$MapSelect == "Thunderforest Landscape"){
+        tiles <- providers$Thunderforest.Landscape
         
-        if(!is.null(mag_filter)){
-            dataset <- subset(dataset, mag %in% mag_filter)
-            print(strtoi(input$magnitudeFilter))
-        }
+      }
+      else if(input$MapSelect == "Esri World Imagery"){
+        tiles <- providers$Esri.WorldImagery
         
-        # Subset by Width
-        wid_filter <- input$widthSlider
-        dataset <- subset(dataset, wid < wid_filter)
-        
-        # Subset by Length
-        len_filter <- input$lengthSlider
-        dataset <- subset(dataset, len < len_filter)
-        print(len_filter)
-        
-        # Subset by Injuries
-        inj_filter <- input$injurySlider
-        dataset <- subset(dataset, inj < inj_filter)
-        
-        # Subset by Loss
-        loss_filter <- input$lossSlider
-        dataset <- subset(dataset, loss < loss_filter)
-        
-        # Select Provider Tiles
-        if(input$MapSelect == "Stamen Toner"){
-            tiles <- providers$Stamen.Toner
-        }
-        else if(input$MapSelect == "Open Topo Map"){
-            tiles <- providers$OpenTopoMap
-            
-        }
-        else if(input$MapSelect == "Thunderforest Landscape"){
-            tiles <- providers$Thunderforest.Landscape
-            
-        }
-        else if(input$MapSelect == "Esri World Imagery"){
-            tiles <- providers$Esri.WorldImagery
-            
-        }
-        else if(input$MapSelect == "Stamen Watercolor"){
-            tiles <- providers$Stamen.Watercolor
-        }
-        else{
-            tiles <- providers$Stamen.Toner
-        }
-        
-        
-        map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
-            addTiles() %>% 
-            addProviderTiles(tiles) %>%
-            setView(map, 
-                    lng = state0()[,"x"],
-                    lat = state0()[,"y"], 
-                    zoom = 6) %>%
-            addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
-            addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
-        map
+      }
+      else if(input$MapSelect == "Stamen Watercolor"){
+        tiles <- providers$Stamen.Watercolor
+      }
+      else{
+        tiles <- providers$Stamen.Toner
+      }
+      
+      
+      map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
+        addTiles() %>% 
+        addProviderTiles(tiles) %>%
+        setView(map, 
+                lng = state0()[,"x"],
+                lat = state0()[,"y"], 
+                zoom = 6) %>%
+        addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
+        addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
+      dataset <- subset(magnitude_sorted,  elat != 0.00 & elon != 0.00)
+      
+      for(i in 1:nrow(dataset)){
+        map <- addPolylines(map, lat = as.numeric(dataset[i, c(16, 18)]), lng = as.numeric(dataset[i, c(17, 19)]), weight=1)
+      }
+      map
     })
     
     output$Leaf1 <- renderLeaflet({
+      
+      dataset <- subset(tornadoes, st == input$SelectState1)
+      dataset <- subset(dataset, yr == input$Slider0)
+      map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
+        addTiles() %>% 
         
-        dataset <- subset(tornadoes, st == input$SelectState1)
-        dataset <- subset(dataset, yr == input$Slider0)
-        map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
-            addTiles() %>% 
-            
-            # Select leaflet provider tiles from user input
-            addProviderTiles(providers$Stamen.TonerLite) %>%
-            
-            setView(map, 
-                    lng = state1()[,"x"], 
-                    lat = state1()[,"y"], 
-                    zoom = 6) %>%
-            addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
-            addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
-        map
+        # Select leaflet provider tiles from user input
+        addProviderTiles(providers$Stamen.TonerLite) %>%
+        
+        setView(map, 
+                lng = state1()[,"x"], 
+                lat = state1()[,"y"], 
+                zoom = 6) %>%
+        addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
+        addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
+      
+      map
+    })
+    
+    output$Leaf10Most <- renderLeaflet({
+      
+      dataset <- subset(tornadoes, st == input$SelectState1)
+      dataset <- subset(dataset, yr == input$Slider0)
+      map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
+        addTiles() %>% 
+        
+        # Select leaflet provider tiles from user input
+        addProviderTiles(providers$Stamen.TonerLite) %>%
+        
+        setView(map, 
+                lng = state1()[,"x"], 
+                lat = state1()[,"y"], 
+                zoom = 6) %>%
+        addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
+        addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
+      dataset <- subset(magnitude_sorted,  elat != 0.00 & elon != 0.00)
+      
+      for(i in 1:nrow(dataset)){
+        map <- addPolylines(map, lat = as.numeric(dataset[i, c(16, 18)]), lng = as.numeric(dataset[i, c(17, 19)]), weight=1)
+      }
+      
+      map
     })
     
     output$heatmap0 <- renderLeaflet({

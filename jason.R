@@ -30,6 +30,9 @@ names(illinois_counties) <- c("Code", "Frequency")
 
 countyInfo <- data.frame(County=counties_names$County, Frequency= illinois_counties$Frequency)
 
+############################################
+#sorting by largest magnitude tornadoes
+magnitude_sorted <- illinois_tornadoes[order(-illinois_tornadoes[,11]),]
 
 ui <- dashboardPage(skin="black",
                     dashboardHeader(title = "You Spin me Round"),
@@ -76,14 +79,6 @@ ui <- dashboardPage(skin="black",
                                 fluidRow(
                                   box(title="Percentage of Magnitudes by Year",
                                       plotOutput("year_magnitude_percentage"), width=12)
-                                ),
-                                fluidRow(
-                                  box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
-                                      dataTableOutput("countyTable"))
-                                ),
-                                fluidRow(
-                                  box(title = "Tornado Counties Graph", solidHeader = TRUE, status = "primary", width = 12,
-                                      plotOutput("countyChart"))
                                 )
                         ),
                         
@@ -137,7 +132,24 @@ ui <- dashboardPage(skin="black",
                                 
                         ),
                         
-                        tabItem(tabName="Illinois"
+                        tabItem(tabName="Illinois",
+                                fluidRow(
+                                  box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
+                                      dataTableOutput("countyTable"))
+                                ),
+                                
+                                fluidRow(
+                                  box(title = "Tornado Counties Graph", solidHeader = TRUE, status = "primary", width = 12,
+                                      plotOutput("countyChart"))
+                                ),
+                                
+                                fluidRow(
+                                  box(title = "Illinois 10 most destructive tornadoes", solidHeader = TRUE, status = "primary", width = 12,
+                                      #selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
+                                      uiOutput("reset2"),
+                                      leafletOutput("Leaf10Most")
+                                  )
+                                )
                                 
                         ),
                         
@@ -365,8 +377,13 @@ server <- function(input, output, session){
               lng = state0()[,"x"],
               lat = state0()[,"y"], 
               zoom = 6) %>%
-      addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
-      addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
+      addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
+      addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
+    dataset <- subset(magnitude_sorted,  elat != 0.00 & elon != 0.00)
+    
+    for(i in 1:nrow(dataset)){
+      map <- addPolylines(map, lat = as.numeric(dataset[i, c(16, 18)]), lng = as.numeric(dataset[i, c(17, 19)]), weight=1)
+    }
     map
   })
   
@@ -384,8 +401,34 @@ server <- function(input, output, session){
               lng = state1()[,"x"], 
               lat = state1()[,"y"], 
               zoom = 6) %>%
-      addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
-      addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
+      addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
+      addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
+
+    map
+  })
+  
+  output$Leaf10Most <- renderLeaflet({
+    
+    dataset <- subset(tornadoes, st == input$SelectState1)
+    dataset <- subset(dataset, yr == input$Slider0)
+    map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
+      addTiles() %>% 
+      
+      # Select leaflet provider tiles from user input
+      addProviderTiles(providers$Stamen.TonerLite) %>%
+      
+      setView(map, 
+              lng = state1()[,"x"], 
+              lat = state1()[,"y"], 
+              zoom = 6) %>%
+      addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
+      addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
+    dataset <- subset(magnitude_sorted,  elat != 0.00 & elon != 0.00)
+    
+    for(i in 1:nrow(dataset)){
+      map <- addPolylines(map, lat = as.numeric(dataset[i, c(16, 18)]), lng = as.numeric(dataset[i, c(17, 19)]), weight=1)
+    }
+    
     map
   })
   
