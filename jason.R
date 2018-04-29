@@ -16,7 +16,8 @@ hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
 # Maybe add in Thunderforest.SpinalMap for fun....
 provider_tiles <- c("Stamen Toner", "Open Topo Map", "Thunderforest Landscape", "Esri World Imagery", "Stamen Watercolor")
 
-## Some of Jasons data
+############################## Some of Jasons data ##########################################
+
 counties_names <- read.csv("counties.csv")
 IL_Code <- 17
 
@@ -34,6 +35,13 @@ countyInfo <- data.frame(County=counties_names$County, Frequency= illinois_count
 #sorting by largest magnitude tornadoes
 magnitude_sorted <- illinois_tornadoes[order(-illinois_tornadoes[,11]),]
 magnitude_sorted10 <- head(magnitude_sorted,10)
+
+injuries_sorted <- illinois_tornadoes[order(-illinois_tornadoes[,12]),]
+injuries_sorted10 <- head(injuries_sorted,10)
+
+fatalities_sorted <- illinois_tornadoes[order(-illinois_tornadoes[,13]),]
+fatalities_sorted10 <-head(fatalities_sorted, 10)
+
 
 ui <- dashboardPage(skin="black",
                     dashboardHeader(title = "You Spin me Round"),
@@ -146,7 +154,7 @@ ui <- dashboardPage(skin="black",
                                 
                                 fluidRow(
                                   box(title = "Illinois 10 Most Powerful/Destructive tornadoes", solidHeader = TRUE, status = "primary", width = 12,
-                                      #selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
+                                      selectInput("top10", "Choose to view by criteria:", choices = c('Magnitude'='1','Fatality'='2', 'Injury' = '3'), selected = 'Magnitude'),
                                       uiOutput("reset2"),
                                       leafletOutput("Leaf10Most")
                                   )
@@ -228,7 +236,7 @@ server <- function(input, output, session){
     ggplot(data=year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') + 
       theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
       xlab("Year") + ylab("Total Earthquakes") + 
-      guides(fill=guide_legend(title="Magnitude"))
+      guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
   })
   
   output$year_magnitude_percentage <- renderPlot({
@@ -237,7 +245,7 @@ server <- function(input, output, session){
     melted_ymp <- melt(as.matrix(year_mag_per))
     
     ggplot(data=melted_ymp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
-      xlab("Year") + ylab("Percentage of Magnitudes")
+      xlab("Year") + ylab("Percentage of Magnitudes") + scale_color_brewer(palette="Set3")
     
   })
   
@@ -247,7 +255,7 @@ server <- function(input, output, session){
     ggplot(data=mo_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') +
       theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
       xlab("Month") + ylab("Total Tornadoes") + 
-      guides(fill=guide_legend(title="Magnitude"))
+      guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
     
   })
   
@@ -257,7 +265,7 @@ server <- function(input, output, session){
     melted_mmp <- melt(as.matrix(mo_mag_per))
     
     ggplot(data=melted_mmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
-      xlab("Month") + ylab("Percentage of Magnitudes")
+      xlab("Month") + ylab("Percentage of Magnitudes") + scale_color_brewer(palette="Set3")
     
   })
   
@@ -267,7 +275,7 @@ server <- function(input, output, session){
     ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
       theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
       xlab("Hour of Day") + ylab("Total Tornadoes") + 
-      guides(fill=guide_legend(title="Magnitude"))
+      guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
     
   })
   
@@ -279,7 +287,7 @@ server <- function(input, output, session){
     
     ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
       xlab("Hours") + ylab("Percentage of Magnitudes") +
-      guides(fill=guide_legend(title="Magnitude"))
+      guides(fill=guide_legend(title="Magnitude")) + scale_color_brewer(palette="Set3")
   })
   
   output$distance_magnitude <- renderPlot({
@@ -289,7 +297,7 @@ server <- function(input, output, session){
     ggplot(data=filt_year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') + 
       theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
       xlab("Year") + ylab("Total Tornadoes") + 
-      guides(fill=guide_legend(title="Magnitude"))
+      guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
   })
   
   
@@ -410,8 +418,17 @@ server <- function(input, output, session){
   
   output$Leaf10Most <- renderLeaflet({
     
-    dataset <- subset(tornadoes, st == input$SelectState1)
-    dataset <- subset(dataset, yr == input$Slider0)
+    # Select dataset by critera
+    if(input$top10 == "1"){   ## if it is the magnitude
+      dataset <- magnitude_sorted10
+    }
+    else if(input$top10 == "2"){ ## if it is the fatalities
+      dataset <- fatalities_sorted10
+    }
+    else{ ##  if it is injuries
+      dataset <- injuries_sorted10
+    }
+    
     map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
       addTiles() %>% 
       
@@ -424,7 +441,7 @@ server <- function(input, output, session){
               zoom = 6) %>%
       addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
       addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
-    dataset <- subset(magnitude_sorted,  elat != 0.00 & elon != 0.00)
+    dataset <- subset(dataset,  elat != 0.00 & elon != 0.00)
     
     for(i in 1:nrow(dataset)){
       map <- addPolylines(map, lat = as.numeric(dataset[i, c(16, 18)]), lng = as.numeric(dataset[i, c(17, 19)]), weight=1)
@@ -440,7 +457,7 @@ server <- function(input, output, session){
     melted_fymp <- melt(as.matrix(filt_year_mag_per))
     
     ggplot(data=melted_fymp, aes(x=Var1, y=value, color=factor(Var2))) + 
-      geom_line(size=3) + xlab("Year") + ylab("Percentage of Magnitudes")
+      geom_line(size=3) + xlab("Year") + ylab("Percentage of Magnitudes") + scale_color_brewer(palette="Set3")
     
   })
   

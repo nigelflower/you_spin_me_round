@@ -19,6 +19,8 @@ hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
 # Maybe add in Thunderforest.SpinalMap for fun....
 provider_tiles <- c("Stamen Toner", "Open Topo Map", "Thunderforest Landscape", "Esri World Imagery", "Stamen Watercolor")
 
+############################## Some of Jasons data ##########################################
+
 counties_names <- read.csv("counties.csv")
 IL_Code <- 17
 
@@ -36,6 +38,12 @@ countyInfo <- data.frame(County=counties_names$County, Frequency= illinois_count
 #sorting by largest magnitude tornadoes
 magnitude_sorted <- illinois_tornadoes[order(-illinois_tornadoes[,11]),]
 magnitude_sorted10 <- head(magnitude_sorted,10)
+
+injuries_sorted <- illinois_tornadoes[order(-illinois_tornadoes[,12]),]
+injuries_sorted10 <- head(injuries_sorted,10)
+
+fatalities_sorted <- illinois_tornadoes[order(-illinois_tornadoes[,13]),]
+fatalities_sorted10 <-head(fatalities_sorted, 10)
 
 #dania's code
 fips <- read.csv(file="US_FIPS_Codes.csv", header=TRUE, sep=",")
@@ -382,14 +390,6 @@ ui <- dashboardPage(skin="black",
                                     fluidRow(
                                         box(title="Percentage of Magnitudes by Year",
                                             plotOutput("year_magnitude_percentage"), width=12)
-                                    ),
-                                    fluidRow(
-                                        box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
-                                            dataTableOutput("countyTable"))
-                                    ),
-                                    fluidRow(
-                                        box(title = "Tornado Counties Graph", solidHeader = TRUE, status = "primary", width = 12,
-                                            plotOutput("countyChart"))
                                     )
                             ),
                             
@@ -504,8 +504,8 @@ ui <- dashboardPage(skin="black",
                                     ),
                                     
                                     fluidRow(
-                                      box(title = "Illinois 10 most destructive tornadoes", solidHeader = TRUE, status = "primary", width = 12,
-                                          #selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
+                                      box(title = "Illinois 10 Most Powerful/Destructive tornadoes", solidHeader = TRUE, status = "primary", width = 12,
+                                          selectInput("top10", "Choose to view by criteria:", choices = c('Magnitude'='1','Fatality'='2', 'Injury' = '3'), selected = 'Magnitude'),
                                           uiOutput("reset2"),
                                           leafletOutput("Leaf10Most")
                                       )
@@ -602,374 +602,249 @@ states <- data.frame(state.name,state.abb,state.center[1],state.center[2])
 fips <- state.fips
 
 server <- function(input, output, session){
+  
+  output$year_magnitude <- renderPlot({
+    year_mag <- data.frame(table(tornadoes$yr, tornadoes$mag))
     
-    output$year_magnitude <- renderPlot({
-        year_mag <- data.frame(table(tornadoes$yr, tornadoes$mag))
-        
-        ggplot(data=year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') + 
-            theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
-            xlab("Year") + ylab("Total Earthquakes") + 
-            guides(fill=guide_legend(title="Magnitude"))
-    })
+    ggplot(data=year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') + 
+      theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+      xlab("Year") + ylab("Total Earthquakes") + 
+      guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
+  })
+  
+  output$year_magnitude_percentage <- renderPlot({
+    year_mag_per <- data.frame(t(apply(table(tornadoes$yr, tornadoes$mag), 1, function(i) i / sum(i))))
+    colnames(year_mag_per) <- magnitudes
+    melted_ymp <- melt(as.matrix(year_mag_per))
     
-    output$year_magnitude_percentage <- renderPlot({
-        year_mag_per <- data.frame(t(apply(table(tornadoes$yr, tornadoes$mag), 1, function(i) i / sum(i))))
-        colnames(year_mag_per) <- magnitudes
-        melted_ymp <- melt(as.matrix(year_mag_per))
-        
-        ggplot(data=melted_ymp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
-            xlab("Year") + ylab("Percentage of Magnitudes")
-        
-    })
+    ggplot(data=melted_ymp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
+      xlab("Year") + ylab("Percentage of Magnitudes") + scale_color_brewer(palette="Set3")
     
-    output$month_magnitude <- renderPlot({
-        mo_mag <- data.frame(table(tornadoes$mo, tornadoes$mag))
-        
-        ggplot(data=mo_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') +
-            theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
-            xlab("Month") + ylab("Total Tornadoes") + 
-            guides(fill=guide_legend(title="Magnitude"))
-        
-    })
+  })
+  
+  output$month_magnitude <- renderPlot({
+    mo_mag <- data.frame(table(tornadoes$mo, tornadoes$mag))
     
-    output$month_magnitude_percentage <- renderPlot({
-        mo_mag_per <- data.frame(t(apply(table(tornadoes$mo, tornadoes$mag), 1, function(i) i / sum(i))))
-        colnames(mo_mag_per) <- magnitudes
-        melted_mmp <- melt(as.matrix(mo_mag_per))
-        
-        ggplot(data=melted_mmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
-            xlab("Month") + ylab("Percentage of Magnitudes")
-        
-    })
+    ggplot(data=mo_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') +
+      theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+      xlab("Month") + ylab("Total Tornadoes") + 
+      guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
     
-    output$hour_magnitude <- renderPlot({
-        # hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
-        hour_mag <- data.frame(table(hours, tornadoes$mag))
-        ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
-            theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
-            xlab("Hour of Day") + ylab("Total Tornadoes") + 
-            guides(fill=guide_legend(title="Magnitude"))
-        
-    })
+  })
+  
+  output$month_magnitude_percentage <- renderPlot({
+    mo_mag_per <- data.frame(t(apply(table(tornadoes$mo, tornadoes$mag), 1, function(i) i / sum(i))))
+    colnames(mo_mag_per) <- magnitudes
+    melted_mmp <- melt(as.matrix(mo_mag_per))
     
-    output$hour_magnitude_percentage <- renderPlot({
-        # hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
-        hour_mag_per <- data.frame(t(apply(table(hours, tornadoes$mag), 1, function(i) i / sum(i))))
-        colnames(hour_mag_per) <- magnitudes
-        melted_hmp <- melt(as.matrix(hour_mag_per))
-        
-        ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
-            xlab("Hours") + ylab("Percentage of Magnitudes") +
-            guides(fill=guide_legend(title="Magnitude"))
-    })
+    ggplot(data=melted_mmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
+      xlab("Month") + ylab("Percentage of Magnitudes") + scale_color_brewer(palette="Set3")
     
-    output$distance_magnitude <- renderPlot({
-        filtered_tornadoes <- subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])
-        filt_year_mag <- data.frame(table(filtered_tornadoes$yr, filtered_tornadoes$mag))
-        
-        ggplot(data=filt_year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') + 
-            theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
-            xlab("Year") + ylab("Total Tornadoes") + 
-            guides(fill=guide_legend(title="Magnitude"))
-    })
+  })
+  
+  output$hour_magnitude <- renderPlot({
+    # hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
+    hour_mag <- data.frame(table(hours, tornadoes$mag))
+    ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
+      theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+      xlab("Hour of Day") + ylab("Total Tornadoes") + 
+      guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
     
+  })
+  
+  output$hour_magnitude_percentage <- renderPlot({
+    # hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
+    hour_mag_per <- data.frame(t(apply(table(hours, tornadoes$mag), 1, function(i) i / sum(i))))
+    colnames(hour_mag_per) <- magnitudes
+    melted_hmp <- melt(as.matrix(hour_mag_per))
     
-    # Ryan Leaflet Server Code
+    ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
+      xlab("Hours") + ylab("Percentage of Magnitudes") +
+      guides(fill=guide_legend(title="Magnitude")) + scale_color_brewer(palette="Set3")
+  })
+  
+  output$distance_magnitude <- renderPlot({
+    filtered_tornadoes <- subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])
+    filt_year_mag <- data.frame(table(filtered_tornadoes$yr, filtered_tornadoes$mag))
     
-    # TODO: clean Reactive Variables
-    reactiveData <- reactive({
-        # Things to constrain by:
-        #  Year
-        #  width
-        #  length
-        #  injury
-        #  fatalities
-        #  Loss
-        
-        dataset <- subset()
-    })
-    # Variables for selecting state and lat/lon (separate from tornado dataset)
-    state0 <- reactive({
-        states[state.abb == input$SelectState0,]
-    })
-    state1 <- reactive({
-        states[state.abb == input$SelectState1,]
-    })
+    ggplot(data=filt_year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') + 
+      theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+      xlab("Year") + ylab("Total Tornadoes") + 
+      guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
+  })
+  
+  
+  # Ryan Leaflet Server Code
+  
+  # TODO: clean Reactive Variables
+  reactiveData <- reactive({
+    # Things to constrain by:
+    #  Year
+    #  width
+    #  length
+    #  injury
+    #  fatalities
+    #  Loss
     
-    heatmapState0 <- reactive({
-        states[state.abb == input$HeatmapState0,]
-    })
+    dataset <- subset()
+  })
+  # Variables for selecting state and lat/lon (separate from tornado dataset)
+  state0 <- reactive({
+    states[state.abb == input$SelectState0,]
+  })
+  state1 <- reactive({
+    states[state.abb == input$SelectState1,]
+  })
+  
+  
+  # Plot output
+  output$Leaf0 <- renderLeaflet({
+    # Subset by Year And State
+    dataset <- subset(tornadoes, st == input$SelectState0)
+    dataset <- subset(dataset, yr <= input$Slider0)
     
-    heatmapState1 <- reactive({
-        states[state.abb == input$HeatmapState1,]
-    })
+    # Subset by Magnitude
+    mag_filter <- input$magnitudeFilter
     
-    # Plot output
-    output$Leaf0 <- renderLeaflet({
-      # Subset by Year And State
-      dataset <- subset(tornadoes, st == input$SelectState0)
-      dataset <- subset(dataset, yr <= input$Slider0)
+    if(!is.null(mag_filter)){
+      dataset <- subset(dataset, mag %in% mag_filter)
+      print(strtoi(input$magnitudeFilter))
+    }
+    
+    # Subset by Width
+    wid_filter <- input$widthSlider
+    dataset <- subset(dataset, wid < wid_filter)
+    
+    # Subset by Length
+    len_filter <- input$lengthSlider
+    dataset <- subset(dataset, len < len_filter)
+    print(len_filter)
+    
+    # Subset by Injuries
+    inj_filter <- input$injurySlider
+    dataset <- subset(dataset, inj < inj_filter)
+    
+    # Subset by Loss
+    loss_filter <- input$lossSlider
+    dataset <- subset(dataset, loss < loss_filter)
+    
+    # Select Provider Tiles
+    if(input$MapSelect == "Stamen Toner"){
+      tiles <- providers$Stamen.Toner
+    }
+    else if(input$MapSelect == "Open Topo Map"){
+      tiles <- providers$OpenTopoMap
       
-      # Subset by Magnitude
-      mag_filter <- input$magnitudeFilter
+    }
+    else if(input$MapSelect == "Thunderforest Landscape"){
+      tiles <- providers$Thunderforest.Landscape
       
-      if(!is.null(mag_filter)){
-        dataset <- subset(dataset, mag %in% mag_filter)
-        print(strtoi(input$magnitudeFilter))
-      }
+    }
+    else if(input$MapSelect == "Esri World Imagery"){
+      tiles <- providers$Esri.WorldImagery
       
-      # Subset by Width
-      wid_filter <- input$widthSlider
-      dataset <- subset(dataset, wid < wid_filter)
+    }
+    else if(input$MapSelect == "Stamen Watercolor"){
+      tiles <- providers$Stamen.Watercolor
+    }
+    else{
+      tiles <- providers$Stamen.Toner
+    }
+    
+    
+    map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
+      addTiles() %>% 
+      addProviderTiles(tiles) %>%
+      setView(map, 
+              lng = state0()[,"x"],
+              lat = state0()[,"y"], 
+              zoom = 6) %>%
+      addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
+      addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
+    dataset <- subset(dataset,  elat != 0.00 & elon != 0.00)
+    
+    for(i in 1:nrow(dataset)){
+      map <- addPolylines(map, lat = as.numeric(dataset[i, c(16, 18)]), lng = as.numeric(dataset[i, c(17, 19)]), weight=1)
+    }
+    map
+  })
+  
+  output$Leaf1 <- renderLeaflet({
+    
+    dataset <- subset(tornadoes, st == input$SelectState1)
+    dataset <- subset(dataset, yr == input$Slider0)
+    map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
+      addTiles() %>% 
       
-      # Subset by Length
-      len_filter <- input$lengthSlider
-      dataset <- subset(dataset, len < len_filter)
-      print(len_filter)
+      # Select leaflet provider tiles from user input
+      addProviderTiles(providers$Stamen.TonerLite) %>%
       
-      # Subset by Injuries
-      inj_filter <- input$injurySlider
-      dataset <- subset(dataset, inj < inj_filter)
+      setView(map, 
+              lng = state1()[,"x"], 
+              lat = state1()[,"y"], 
+              zoom = 6) %>%
+      addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
+      addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
+    
+    map
+  })
+  
+  output$Leaf10Most <- renderLeaflet({
+    
+    # Select dataset by critera
+    if(input$top10 == "1"){   ## if it is the magnitude
+      dataset <- magnitude_sorted10
+    }
+    else if(input$top10 == "2"){ ## if it is the fatalities
+      dataset <- fatalities_sorted10
+    }
+    else{ ##  if it is injuries
+      dataset <- injuries_sorted10
+    }
+    
+    map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
+      addTiles() %>% 
       
-      # Subset by Loss
-      loss_filter <- input$lossSlider
-      dataset <- subset(dataset, loss < loss_filter)
+      # Select leaflet provider tiles from user input
+      addProviderTiles(providers$Stamen.TonerLite) %>%
       
-      # Select Provider Tiles
-      if(input$MapSelect == "Stamen Toner"){
-        tiles <- providers$Stamen.Toner
-      }
-      else if(input$MapSelect == "Open Topo Map"){
-        tiles <- providers$OpenTopoMap
-        
-      }
-      else if(input$MapSelect == "Thunderforest Landscape"){
-        tiles <- providers$Thunderforest.Landscape
-        
-      }
-      else if(input$MapSelect == "Esri World Imagery"){
-        tiles <- providers$Esri.WorldImagery
-        
-      }
-      else if(input$MapSelect == "Stamen Watercolor"){
-        tiles <- providers$Stamen.Watercolor
-      }
-      else{
-        tiles <- providers$Stamen.Toner
-      }
-      
-      
-      map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
-        addTiles() %>% 
-        addProviderTiles(tiles) %>%
-        setView(map, 
-                lng = state0()[,"x"],
-                lat = state0()[,"y"], 
-                zoom = 6) %>%
-        addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
-        addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
-      dataset <- subset(dataset,  elat != 0.00 & elon != 0.00)
-      
-      for(i in 1:nrow(dataset)){
-        map <- addPolylines(map, lat = as.numeric(dataset[i, c(16, 18)]), lng = as.numeric(dataset[i, c(17, 19)]), weight=1)
-      }
-      map
-    })
+      setView(map, 
+              lng = state1()[,"x"], 
+              lat = state1()[,"y"], 
+              zoom = 6) %>%
+      addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
+      addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
+    dataset <- subset(dataset,  elat != 0.00 & elon != 0.00)
     
-    output$Leaf1 <- renderLeaflet({
-      
-      dataset <- subset(tornadoes, st == input$SelectState1)
-      dataset <- subset(dataset, yr == input$Slider0)
-      map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
-        addTiles() %>% 
-        
-        # Select leaflet provider tiles from user input
-        addProviderTiles(providers$Stamen.TonerLite) %>%
-        
-        setView(map, 
-                lng = state1()[,"x"], 
-                lat = state1()[,"y"], 
-                zoom = 6) %>%
-        addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
-        addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
-      
-      map
-    })
+    for(i in 1:nrow(dataset)){
+      map <- addPolylines(map, lat = as.numeric(dataset[i, c(16, 18)]), lng = as.numeric(dataset[i, c(17, 19)]), weight=1)
+    }
     
-    output$Leaf10Most <- renderLeaflet({
-      
-      dataset <- subset(tornadoes, st == input$SelectState1)
-      dataset <- subset(dataset, yr == input$Slider0)
-      map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
-        addTiles() %>% 
-        
-        # Select leaflet provider tiles from user input
-        addProviderTiles(providers$Stamen.TonerLite) %>%
-        
-        setView(map, 
-                lng = state1()[,"x"], 
-                lat = state1()[,"y"], 
-                zoom = 6) %>%
-        addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
-        addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
-      dataset <- subset(dataset,  elat != 0.00 & elon != 0.00)
-      
-      for(i in 1:nrow(dataset)){
-        map <- addPolylines(map, lat = as.numeric(dataset[i, c(16, 18)]), lng = as.numeric(dataset[i, c(17, 19)]), weight=1)
-      }
-      
-      map
-    })
+    map
+  })
+  
+  output$distance_magnitude_percentage <- renderPlot({
+    filtered_tornadoes <- subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])
+    filt_year_mag_per <- data.frame(t(apply(table(filtered_tornadoes$yr, filtered_tornadoes$mag), 1, function(i) i / sum(i))))
+    #colnames(filt_year_mag_per) <- magnitudes
+    melted_fymp <- melt(as.matrix(filt_year_mag_per))
     
-    output$heatmap0 <- renderLeaflet({
-        
-        # Subset by Year And State
-        dataset <- subset(tornadoes, st == input$HeatmapState0)
-        
-        map <- leaflet(dataset) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
-            setView(map, 
-                    lng = heatmapState0()[,"x"], 
-                    lat = heatmapState0()[,"y"], 
-                    zoom = 6) %>%
-            addHeatmap(lng = ~slon, lat = ~slat, intensity = ~mag, blur = 20,
-                       max = 0.001, radius = 8)
-        map
-    })
+    ggplot(data=melted_fymp, aes(x=Var1, y=value, color=factor(Var2))) + 
+      geom_line(size=3) + xlab("Year") + ylab("Percentage of Magnitudes") + scale_color_brewer(palette="Set3")
     
-    output$heatmap1 <- renderLeaflet({
-        # Subset by Year And State
-        dataset <- subset(tornadoes, st == input$HeatmapState1)
-        
-        map <- leaflet(dataset) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
-            setView(map, 
-                    lng = heatmapState1()[,"x"], 
-                    lat = heatmapState1()[,"y"], 
-                    zoom = 6) %>%
-            addHeatmap(lng = ~elon, lat = ~elat, intensity = ~mag, blur = 20,
-                       max = 0.001, radius = 8)
-        map
-        
-    })
+  })
+  
+  output$countyTable <- renderDataTable({
+    datatable(countyInfo, 
+              options = list(searching = FALSE, pageLength = 8, lengthChange = FALSE))
+  })
+  
+  
+  output$countyChart <- renderPlot({
+    ggplot(data = countyInfo, aes(x=countyInfo$County, y=countyInfo$Frequency))  +
+      geom_bar(position="dodge", stat="identity", fill = "orange") + labs(x="County ", y = "# of Tornadoes") + theme(axis.text.x = element_text(angle = 90, vjust=0.5))
     
-    output$distance_magnitude_percentage <- renderPlot({
-        filtered_tornadoes <- subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])
-        filt_year_mag_per <- data.frame(t(apply(table(filtered_tornadoes$yr, filtered_tornadoes$mag), 1, function(i) i / sum(i))))
-        #colnames(filt_year_mag_per) <- magnitudes
-        melted_fymp <- melt(as.matrix(filt_year_mag_per))
-        
-        ggplot(data=melted_fymp, aes(x=Var1, y=value, color=factor(Var2))) + 
-            geom_line(size=3) + xlab("Year") + ylab("Percentage of Magnitudes")
-        
-    })
-    
-    output$countyTable <- renderDataTable({
-        datatable(illinois_counties, 
-                  options = list(searching = FALSE, pageLength = 8, lengthChange = FALSE))
-    })
-    
-    
-    output$countyChart <- renderPlot({
-        ggplot(data = countyInfo, aes(x=countyInfo$County, y=countyInfo$Frequency))  +
-            geom_bar(position="dodge", stat="identity", fill = "orange") + labs(x="County", y = "# of Tornadoes") + theme(axis.text.x = element_text(angle = 90, vjust=0.5))
-        
-    })
-    
-    #Dania's output
-    
-    #data tables for part c bullets 6-8 for years, months, and hours
-    output$yearInjFatTable <- renderDataTable(
-      getTornadoInjFatPerYearTable(tornadoesIL), 
-      options = list(orderClasses = TRUE,
-                     pageLength = 10,  dom = 'tp')
-    )
-    
-    output$yearLossTable <- renderDataTable(
-      getTornadoLossPerYearTable(yearlyloss), 
-      options = list(orderClasses = TRUE,
-                     pageLength = 10,  dom = 'tp')
-    )
-    
-    output$monthInjFatTable <- renderDataTable(
-      getTornadoInjFatPerMonthTable(tornadoesIL), 
-      options = list(orderClasses = TRUE,
-                     pageLength = 10,  dom = 'tp')
-    )
-    
-    output$monthLossTable <- renderDataTable(
-      getTornadoLossPerMonthTable(monthlyloss), 
-      options = list(orderClasses = TRUE,
-                     pageLength = 10,  dom = 'tp')
-    )
-    
-    output$hourInjFatTable <- renderDataTable(
-      getTornadoInjFatPerHourTable(tornadoesIL), 
-      options = list(orderClasses = TRUE,
-                     pageLength = 10,  dom = 'tp')
-    )
-    
-    output$hourLossTable <- renderDataTable(
-      getTornadoLossPerHourTable(hourlyloss), 
-      options = list(orderClasses = TRUE,
-                     pageLength = 10,  dom = 'tp')
-    )
-    
-    #plots for part c bullets 6-8 for years, months, and hours
-    output$yearInjFatPlot <- renderPlotly({
-      tornadoData <- aggregate(tornadoesIL[,12:13],by=list(tornadoesIL$yr), FUN=sum)
-      names(tornadoData )[1]<-"year"
-      dynamic_bar_graph_grouped(tornadoData, tornadoData$year, 
-                                tornadoData$inj, "Injuries", 
-                                tornadoData$fat, "Fatalities", 
-                                "Year", "Total Damages", "", "Type of Damage")
-    })
-    
-    output$yearLossPlot <- renderPlotly({
-      dynamic_bar_graph_stacked(yearlyloss, yearlyloss$yr, yearlyloss$yrloss, yearlyloss$loss, 
-                                "Loss", "Year", "Tornadoes Per Year", "", "Year")
-      
-    })
-    
-    output$monthInjFatPlot <- renderPlotly({
-      tornadoData <- aggregate(tornadoesIL[,12:13],by=list(tornadoesIL$mo), FUN=sum)
-      names(tornadoData )[1]<-"month"
-      dynamic_bar_graph_grouped(tornadoData, tornadoData$month, 
-                                tornadoData$inj, "Injuries", 
-                                tornadoData$fat, "Fatalities", 
-                                "Month", "Total Damages", "", "Type of Damage")
-    })
-    
-    output$monthLossPlot <- renderPlotly({
-      dynamic_bar_graph_stacked(monthlyloss, monthlyloss$mo, monthlyloss$moloss, monthlyloss$loss,
-                                "Loss", "Month", "Tornadoes Per Month", "", "Month")
-      
-    })
-    
-    output$hourInjFatPlot <- renderPlotly({
-      tornadoData <- aggregate(tornadoesIL[,12:13],by=list(tornadoesIL$hr), FUN=sum)
-      names(tornadoData )[1]<-"hour"
-      dynamic_bar_graph_grouped(tornadoData, tornadoData$hour, 
-                                tornadoData$inj, "Injuries", 
-                                tornadoData$fat, "Fatalities", 
-                                "Hour of Day", "Total Damages", "", "Type of Damage")
-    })
-    
-    output$hourLossPlot <- renderPlotly({
-      dynamic_bar_graph_stacked(hourlyloss, hourlyloss$hr, hourlyloss$hrloss, hourlyloss$loss,
-                                "Loss", "Hour", "Tornadoes Per Hour", "", "Hour")   
-    })
-    
-    
-    output$injuryCountyPlot <- renderPlotly({
-      ggplotly(countyInjuriesMap)
-    })
-    
-    output$fatalityCountyPlot <- renderPlotly({
-      ggplotly(countyDeathsMap)
-    })
-    
-    output$lossCountyPlot <- renderPlotly({
-      ggplotly(countyLossMap)
-    })
+  })
 }
 
 shinyApp(ui, server)
