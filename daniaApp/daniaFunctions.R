@@ -10,6 +10,7 @@ library(scales)
 library(plyr)
 library(maps)
 library(plotly)
+library(RColorBrewer)
 
 setwd("~/Documents/Github/you_spin_me_round/daniaApp")
 
@@ -22,11 +23,14 @@ illinois <- map_data("county") %>%
 tornadoes <- read.csv("tornadoes.csv")
 tornadoes <- subset(tornadoes, st == "IL")
 tornadoes$hr <- as.POSIXlt(tornadoes$time, format="%H:%M")$hour
-tornadoes$countyName <- fipsIllinois$County.Name[match(tornadoes$f1, fipsIllinois$FIPS.County)]
-tornadoes$countyName <- tolower(tornadoes$countyName)
-
-#illinois = illinois[!duplicated(illinois$subregion),]
-tornadoesWithFips <- merge(illinois, tornadoes, by.x = "subregion", by.y = "countyName")
+tornadoes$countyNamef1 <- fipsIllinois$County.Name[match(tornadoes$f1, fipsIllinois$FIPS.County)]
+tornadoes$countyNamef1 <- tolower(tornadoes$countyNamef1)
+tornadoes$countyNamef2 <- fipsIllinois$County.Name[match(tornadoes$f2, fipsIllinois$FIPS.County)]
+tornadoes$countyNamef2 <- tolower(tornadoes$countyNamef2)
+tornadoes$countyNamef3 <- fipsIllinois$County.Name[match(tornadoes$f3, fipsIllinois$FIPS.County)]
+tornadoes$countyNamef3 <- tolower(tornadoes$countyNamef3)
+tornadoes$countyNamef4 <- fipsIllinois$County.Name[match(tornadoes$f4, fipsIllinois$FIPS.County)]
+tornadoes$countyNamef4 <- tolower(tornadoes$countyNamef4)
 
 #Changing the data for loss column of tornadoes to be categorical 0-7
 tornadoes$loss <- ifelse(tornadoes$yr >= 2016, 
@@ -45,7 +49,8 @@ tornadoes$loss <- ifelse(tornadoes$yr >= 2016,
                         (ifelse(tornadoes$loss >= 5 & tornadoes$loss < 50,5,
                         (ifelse(tornadoes$loss >= 50 & tornadoes$loss < 500,6,
                         (ifelse(tornadoes$loss >= 500,7 , 0)))))))))))))), 
-                  (ifelse(tornadoes$loss <= 3, 1, tornadoes$loss - 2))))
+                        (ifelse(tornadoesIL$loss <= 3, 
+                                (ifelse(tornadoesIL$loss > 0, 1, 0)), tornadoesIL$loss - 2))))
 
 #helper function to calculate the amount of tornadoes that had a certain loss range 
 countLoss <- function(loss){
@@ -57,13 +62,46 @@ yearlyloss <- tornadoes %>%
   group_by(yr, loss) %>%
   summarise(yrloss= sum(countLoss(loss)))
 
+yearlyloss$loss[yearlyloss$loss == 0] <- "An Unknown"
+yearlyloss$loss[yearlyloss$loss == 1] <- "Between 0 and 5,000"
+yearlyloss$loss[yearlyloss$loss == 2] <- "Between 5,000 and 50,000"
+yearlyloss$loss[yearlyloss$loss == 3] <- "Between 50,000 and 500,000"
+yearlyloss$loss[yearlyloss$loss == 4] <- "Between 500,000 and 5,000,000"
+yearlyloss$loss[yearlyloss$loss == 5] <- "Between 5,000,000 and 50,000,000"
+yearlyloss$loss[yearlyloss$loss == 6] <- "Between 50,000,000 and 500,000,000"
+yearlyloss$loss[yearlyloss$loss == 7] <- "Greater than 500,000,000"
+
 monthlyloss <- tornadoes %>%
   group_by(mo, loss) %>%
   summarise(moloss= sum(countLoss(loss)))
 
+monthlyloss$loss[monthlyloss$loss == 0] <- "An Unknown"
+monthlyloss$loss[monthlyloss$loss == 1] <- "Between 0 and 5,000"
+monthlyloss$loss[monthlyloss$loss == 2] <- "Between 5,000 and 50,000"
+monthlyloss$loss[monthlyloss$loss == 3] <- "Between 50,000 and 500,000"
+monthlyloss$loss[monthlyloss$loss == 4] <- "Between 500,000 and 5,000,000"
+monthlyloss$loss[monthlyloss$loss == 5] <- "Between 5,000,000 and 50,000,000"
+monthlyloss$loss[monthlyloss$loss == 6] <- "Between 50,000,000 and 500,000,000"
+monthlyloss$loss[monthlyloss$loss == 7] <- "Greater than 500,000,000"
+
 hourlyloss <- tornadoes %>%
   group_by(hr, loss) %>%
   summarise(hrloss=sum(countLoss(loss)))
+
+hourlyloss$loss[hourlyloss$loss == 0] <- "An Unknown"
+hourlyloss$loss[hourlyloss$loss == 1] <- "Between 0 and 5,000"
+hourlyloss$loss[hourlyloss$loss == 2] <- "Between 5,000 and 50,000"
+hourlyloss$loss[hourlyloss$loss == 3] <- "Between 50,000 and 500,000"
+hourlyloss$loss[hourlyloss$loss == 4] <- "Between 500,000 and 5,000,000"
+hourlyloss$loss[hourlyloss$loss == 5] <- "Between 5,000,000 and 50,000,000"
+hourlyloss$loss[hourlyloss$loss == 6] <- "Between 50,000,000 and 500,000,000"
+hourlyloss$loss[hourlyloss$loss == 7] <- "Greater than 500,000,000"
+
+tornadoesWithFips1 <- merge(illinois, tornadoes, by.x = "subregion", by.y = "countyNamef1")
+tornadoesWithFips2 <- merge(illinois, tornadoes, by.x = "subregion", by.y = "countyNamef2")
+tornadoesWithFips3 <- merge(illinois, tornadoes, by.x = "subregion", by.y = "countyNamef3")
+tornadoesWithFips4 <- merge(illinois, tornadoes, by.x = "subregion", by.y = "countyNamef4")
+
 
 # --------------------------- PART C BULLET POINTS -----------------------------
 # 1.) table and chart showing the total number of tornadoes (and # and % in each 
@@ -118,18 +156,13 @@ getTornadoLossPerYear <- function(tornadoes){
   #names(tornadoData )[1]<-"year"
   #names(tornadoData )[2]<-"total"
   #dynamic_bar_graph(tornadoData,tornadoData$year, tornadoData$total,"Year", "Total Loss", "")
-  dynamic_bar_graph_stacked(yearlyloss, yearlyloss$yr, yearlyloss$yrloss, yearlyloss$loss, "Loss", "Year", "Tornadoes Per Year", "Loss", "Year")
+  dynamic_bar_graph_stacked(yearlyloss, yearlyloss$yr, yearlyloss$yrloss, yearlyloss$loss, 
+                            "Loss", "Year", "Tornadoes Per Year", "", "Year")
 }
 
 getAllTornadoDamagePerYear <- function(tornadoes){
   tornadoData <- aggregate(tornadoes[,12:13],by=list(tornadoes$yr), FUN=sum)
   names(tornadoData )[1]<-"year"
-  
-  #line chart or grouped bar chart better?
-  dynamic_line_chart(tornadoData, tornadoData$year, 
-                     tornadoData$inj, "Injuries", 
-                     tornadoData$fat, "Fatalities", 
-                     "Year", "Total Loss", "", "Type of Damage")
   dynamic_bar_graph_grouped(tornadoData, tornadoData$year, 
                             tornadoData$inj, "Injuries", 
                             tornadoData$fat, "Fatalities", 
@@ -162,17 +195,13 @@ getTornadoFatalitiesPerMonth <- function(tornadoes){
 
 getTornadoLossPerMonth <- function(tornadoes){
   dynamic_bar_graph_stacked(monthlyloss, monthlyloss$mo, monthlyloss$moloss, monthlyloss$loss,
-                            "Loss", "Month", "Tornadoes Per Month", "Loss", "Month")
+                            "Loss", "Month", "Tornadoes Per Month", "", "Month")
 }
 
 
 getAllTornadoDamagePerMonth <- function(tornadoes){
   tornadoData <- aggregate(tornadoes[,12:13],by=list(tornadoes$mo), FUN=sum)
   names(tornadoData )[1]<-"month"
-  dynamic_line_chart(tornadoData, tornadoData$month, 
-                     tornadoData$inj, "Injuries", 
-                     tornadoData$fat, "Fatalities", 
-                     "Month", "Total Loss", "", "Type of Damage")
   dynamic_bar_graph_grouped(tornadoData, tornadoData$month, 
                             tornadoData$inj, "Injuries", 
                             tornadoData$fat, "Fatalities", 
@@ -206,16 +235,12 @@ getTornadoFatalitiesPerDay <- function(tornadoes){
 
 getTornadoLossPerDay <- function(tornadoes){
   dynamic_bar_graph_stacked(hourlyloss, hourlyloss$hr, hourlyloss$hrloss, hourlyloss$loss,
-                            "Loss", "Hour", "Tornadoes Per Hour", "Loss", "Hour") 
+                            "Loss", "Hour", "Tornadoes Per Hour", "", "Hour") 
 }
 
 getAllTornadoDamagePerDay <- function(tornadoes){
   tornadoData <- aggregate(tornadoes[,12:13],by=list(tornadoes$hr), FUN=sum)
   names(tornadoData )[1]<-"hour"
-  dynamic_line_chart(tornadoData, tornadoData$hour, 
-                     tornadoData$inj, "Injuries", 
-                     tornadoData$fat, "Fatalities", 
-                     "Hour of Day", "Total Damages", "", "Type of Damage")
   dynamic_bar_graph_grouped(tornadoData, tornadoData$hour, 
                             tornadoData$inj, "Injuries", 
                             tornadoData$fat, "Fatalities", 
@@ -237,7 +262,8 @@ redColorLight <- "#ec5757"
 redColorDark <- "#762b2b"
 
 dynamic_bar_graph <- function(data,x_axis, y_axis,x_label, y_label, title){
-  plot_ly(data, x = x_axis, y = y_axis, type = 'bar', color=I(redColorLight)) %>%
+  plot_ly(data, x = x_axis, y = y_axis, type = 'bar', color=I(redColorLight), 
+          hoverinfo='text', text = ~paste('Total: ', y_axis)) %>%
     layout(title = title,
            xaxis = list(title = x_label,dtick=1,tickangle=45),
            yaxis = list(title = y_label))
@@ -245,7 +271,9 @@ dynamic_bar_graph <- function(data,x_axis, y_axis,x_label, y_label, title){
 
 dynamic_bar_graph_grouped <- function(data, x_axis, y_axis1, label1, y_axis2, label2, 
                                       x_axis_label, y_axis_label, title, legend_title = "Legend"){
-  plot_ly(data, x = x_axis, y = y_axis1, type = 'bar', name = label1, marker = list(color = redColorLight)) %>%
+  plot_ly(data, x = x_axis, y = y_axis1, type = 'bar', name = label1, marker = list(color = redColorLight),
+          hoverinfo='text', text = ~paste('Total Injuries: ', y_axis1,
+                                          '<br> Total Fatalities', y_axis2)) %>%
     add_trace(data=data, x = x_axis, y = y_axis2,  name = label2, marker = list(color = redColorDark)) %>%
     layout(xaxis = list(title = x_axis_label, dtick=1, tickangle=45),
            yaxis = list(title = y_axis_label),
@@ -256,7 +284,12 @@ dynamic_bar_graph_grouped <- function(data, x_axis, y_axis1, label1, y_axis2, la
 
 dynamic_bar_graph_stacked <- function(data, x_axis, y_axis,group, label, 
                                       x_axis_label, y_axis_label, title, legend_title = "Legend"){
-  plot_ly(data, x = x_axis, y = y_axis, type = 'bar', name = label, color= group, colors = 'Reds') %>%
+  plot_ly(data, x = x_axis, y = y_axis, type = 'bar', name = label, color= group, name = group,colors = 'Reds',
+          legendgroup = ~group,
+          hoverinfo = 'text',
+          text = ~paste('Year: ', x_axis,
+                        '<br> Number of Tornadoes: ', y_axis,
+                        '<br> Loss Category: ', group)) %>%
     layout(xaxis = list(title = x_axis_label, dtick=1, tickangle=45),
            yaxis = list(title = y_axis_label),
            title = title,
@@ -312,10 +345,107 @@ dynamic_line_chart <- function(data, x_axis, y_axis1, label1, y_axis2, label2,
 # tornadoes of each magnitude) on a per county basis for all the Illinois 
 # counties on the map
 
-countyInj <- aggregate(inj ~ subregion + lat + long + group + order, tornadoesWithFips, sum)
+countyInj <- aggregate(inj ~ subregion + lat + long + group + order, tornadoesWithFips1, sum)
+
+countyInj2 <- aggregate(inj ~ subregion + lat + long + group + order, tornadoesWithFips2, sum)
+names(countyInj2)[names(countyInj2) == "inj"] = "inj2" 
+countyInj2 <- countyInj2[ , -which(names(countyInj2) %in% c("subregion", "lat", "long", "group"))]
+
+countyInj3 <- aggregate(inj ~ subregion + lat + long + group + order, tornadoesWithFips3, sum)
+names(countyInj3)[names(countyInj3) == "inj"] = "inj3" 
+countyInj3 <- countyInj3[ , -which(names(countyInj3) %in% c("subregion", "lat", "long", "group"))]
+
+countyInj4 <- aggregate(inj ~ subregion + lat + long + group + order, tornadoesWithFips4, sum)
+names(countyInj4)[names(countyInj4) == "inj"] = "inj4" 
+countyInj4 <- countyInj4[ , -which(names(countyInj4) %in% c("subregion", "lat", "long", "group"))]
+
+countyInj <- merge(x = countyInj, y = countyInj2, by = "order", all.x=TRUE)
+countyInj <- merge(x = countyInj, y = countyInj3, by = "order", all.x=TRUE)
+countyInj <- merge(x = countyInj, y = countyInj4, by = "order", all.x=TRUE)
+
+countyInj$inj2[is.na(countyInj$inj2)] <- 0
+countyInj$inj3[is.na(countyInj$inj3)] <- 0
+countyInj$inj4[is.na(countyInj$inj4)] <- 0
+countyInj$inj <- countyInj$inj + countyInj$inj2 + countyInj$inj3 + countyInj$inj4 
+
 countyInj<- countyInj[order(countyInj$order),] 
-countyInjuriesMap <- ggplot(countyInj, aes(x = countyInj$long, y = countyInj$lat, group = group, fill = inj)) + geom_polygon(color='black')
+names(countyInj)[names(countyInj) == "inj"] = "Injury"
+countyInjuriesMap <- ggplot(countyInj, aes(x = countyInj$long, y = countyInj$lat, group = group, fill = Injury)) + geom_polygon(color='black') + 
+  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + 
+  scale_fill_gradient(low="#fee0d2",high="#99000d") + 
+  theme(plot.title = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank())
 ggplotly(countyInjuriesMap)
+
+
+#county deaths
+countyDeaths <- aggregate(fat ~ subregion + lat + long + group + order, tornadoesWithFips1, sum)
+
+countyDeaths2 <- aggregate(fat ~ subregion + lat + long + group + order, tornadoesWithFips2, sum)
+names(countyDeaths2)[names(countyDeaths2) == "fat"] = "fat2" 
+countyDeaths2 <- countyDeaths2[ , -which(names(countyDeaths2) %in% c("subregion", "lat", "long", "group"))]
+
+countyDeaths3 <- aggregate(fat ~ subregion + lat + long + group + order, tornadoesWithFips3, sum)
+names(countyDeaths3)[names(countyDeaths3) == "fat"] = "fat3" 
+countyDeaths3 <- countyDeaths3[ , -which(names(countyDeaths3) %in% c("subregion", "lat", "long", "group"))]
+
+countyDeaths4 <- aggregate(fat ~ subregion + lat + long + group + order, tornadoesWithFips4, sum)
+names(countyDeaths4)[names(countyDeaths4) == "fat"] = "fat4" 
+countyDeaths4 <- countyDeaths4[ , -which(names(countyDeaths4) %in% c("subregion", "lat", "long", "group"))]
+
+countyDeaths <- merge(x = countyDeaths, y = countyDeaths2, by = "order", all.x=TRUE)
+countyDeaths <- merge(x = countyDeaths, y = countyDeaths3, by = "order", all.x=TRUE)
+countyDeaths <- merge(x = countyDeaths, y = countyDeaths4, by = "order", all.x=TRUE)
+
+countyDeaths$fat2[is.na(countyDeaths$fat2)] <- 0
+countyDeaths$fat3[is.na(countyDeaths$fat3)] <- 0
+countyDeaths$fat4[is.na(countyDeaths$fat4)] <- 0
+countyDeaths$fat <- countyDeaths$fat + countyDeaths$fat2 + countyDeaths$fat3 + countyDeaths$fat4 
+
+countyDeaths <- countyDeaths[order(countyDeaths$order),] 
+names(countyDeaths)[names(countyDeaths) == "fat"] = "Fatalities"
+countyDeathsMap <- ggplot(countyDeaths, aes(x = countyDeaths$long, y = countyDeaths$lat, group = group, fill = Fatalities)) + geom_polygon(color='black') + 
+  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+  scale_fill_gradient(low="#fee0d2",high="#99000d") + 
+  theme(plot.title = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank())
+ggplotly(countyDeathsMap)
+
+#county loss
+countyLoss <- tornadoesWithFips1
+
+countyLoss2 <- tornadoesWithFips2
+names(countyLoss2)[names(countyLoss2) == "loss"] = "loss2"
+countyLoss2 <- countyLoss2[,c("order","loss2")]
+
+countyLoss3 <- tornadoesWithFips3
+names(countyLoss3)[names(countyLoss3) == "loss"] = "loss3"
+countyLoss3 <- countyLoss3[,c("order","loss3")]
+
+countyLoss4 <- tornadoesWithFips4
+names(countyLoss4)[names(countyLoss4) == "loss"] = "loss4"
+countyLoss4 <- countyLoss4[,c("order","loss4")]
+
+countyLoss <- merge(x = countyLoss, y = countyLoss2, by = "order", all.x=TRUE)
+countyLoss <- merge(x = countyLoss, y = countyLoss3, by = "order", all.x=TRUE)
+countyLoss <- merge(x = countyLoss, y = countyLoss4, by = "order", all.x=TRUE)
+
+countyLoss$loss2[is.na(countyLoss$loss2)] <- 0
+countyLoss$loss3[is.na(countyLoss$loss3)] <- 0
+countyLoss$loss4[is.na(countyLoss$loss4)] <- 0
+
+countyLoss$loss <- pmax(countyLoss$loss, countyLoss$loss2, countyLoss$loss3, countyLoss$loss4)
+countyLoss <- countyLoss[order(countyLoss$order),] 
+names(countyLoss)[names(countyLoss) == "loss"] = "Losses"
+countyLossMap <- ggplot(countyLoss, aes(x = countyLoss$long, y = countyLoss$lat, group = group, fill = factor(Losses))) + geom_polygon(color='black') + 
+  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + 
+  scale_fill_brewer(palette="Reds")+ theme(
+    plot.title = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank())
+ggplotly(countyLossMap)
 
 
 p <- x %>%
@@ -338,17 +468,6 @@ p <- x %>%
   )
 
 
-
-countyDeaths <- aggregate(fat ~ subregion + lat + long + group + order, tornadoesWithFips, sum)
-countyDeaths <- countyDeaths[order(countyDeaths$order),] 
-countyDeathsMap <- ggplot(countyDeaths, aes(x = countyDeaths$long, y = countyDeaths$lat, group = group, fill = fat)) + geom_polygon(color='black')
-ggplotly(countyDeathsMap)
-
-countyLoss <- tornadoesWithFips
-countyLoss <- countyLoss[order(countyLoss$order),] 
-countyLossMap <- ggplot(countyLoss, aes(x = countyLoss$long, y = countyLoss$lat, group = group, fill = loss)) + geom_polygon(color='black')
-ggplotly(countyLossMap)
-
 # 2.) allow a user to compare the Illinois tabular data to data from any other 
 # state that the user chooses (from a list of all 50 states) in tabular form
 
@@ -370,6 +489,3 @@ ggplotly(countyLossMap)
 
 # 2.) use the data to create a heat map for Illinois showing where it is more 
 # or less safe to be regarding tornadoes
-
-gcounty <- map_data("county")
-head(gcounty)
