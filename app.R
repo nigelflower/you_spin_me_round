@@ -125,11 +125,11 @@ server <- function(input, output, session){
     # Subset by Year
     dataset <- subset(tornadoes, yr == input$compYear)
     # Subset by Month
-    #dataset <- subset(tornadoes, yr == input$compMonth)
+    dataset <- subset(dataset, mo >= input$compMonth[1] & mo <= input$compMonth[2])
     # Subset by Width
     wid_min <- input$compWidth[1]
     wid_max <- input$compWidth[2]
-    dataset <- subset(dataset, wid >= wid_min, wid <= wid_max)
+    dataset <- subset(dataset, wid >= wid_min & wid <= wid_max)
     # Subset by Length
     len_min <- input$compLength[1]
     len_max <- input$compLength[2]
@@ -208,7 +208,10 @@ server <- function(input, output, session){
     #addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
     #addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
     for(i in 1:nrow(dataset)){
-      map <- addPolylines(map, lat = as.numeric(dataset[i,c('slat','elat')]),lng = as.numeric(dataset[i,c('slon','elon')]))
+      map <- addPolylines(map, lat = as.numeric(dataset[i,c('slat','elat')]),lng = as.numeric(dataset[i,c('slon','elon')]),
+                          opacity = .2*((as.numeric(dataset[i,'mag'])+1))
+                          )
+                          
     }
     map
   })
@@ -250,7 +253,9 @@ server <- function(input, output, session){
               lat = state1()[,"y"], 
               zoom = 6) 
       for(i in 1:nrow(dataset)){
-        map <- addPolylines(map, lat = as.numeric(dataset[i,c('slat','elat')]),lng = as.numeric(dataset[i,c('slon','elon')]))
+        map <- addPolylines(map, lat = as.numeric(dataset[i,c('slat','elat')]),lng = as.numeric(dataset[i,c('slon','elon')]), 
+                            weight = 3*(as.numeric(dataset[i,'mag'])+1)
+                            )
       }
       map
   })
