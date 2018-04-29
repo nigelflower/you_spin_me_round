@@ -448,7 +448,7 @@ countyLoss$loss[countyLoss$loss == 6] <- "6: Between 50,000,000 and 500,000,000"
 countyLoss$loss[countyLoss$loss == 7] <- "7: Greater than 500,000,000"
 names(countyLoss)[names(countyLoss) == "loss"] = "Losses"
 
-countyLossMap <- ggplot(countyLoss, aes(x = countyLoss$long, y = countyLoss$lat, group = group, fill = Losses)) + geom_polygon(color='black') + 
+countyLossMap <- ggplot(countyLoss, aes(x = countyLoss$long, y = countyLoss$lat, group = group, fill = Losses, text = paste('County: ', countyLoss$subregion))) + geom_polygon(color='black') + 
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + 
   scale_fill_brewer(palette="Blues")+ theme(
     plot.title = element_blank(),

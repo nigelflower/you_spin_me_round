@@ -167,7 +167,7 @@ countyInj$inj <- countyInj$inj + countyInj$inj2 + countyInj$inj3 + countyInj$inj
 
 countyInj<- countyInj[order(countyInj$order),] 
 names(countyInj)[names(countyInj) == "inj"] = "Injury"
-countyInjuriesMap <- ggplot(countyInj, aes(x = countyInj$long, y = countyInj$lat, group = group, fill = Injury)) + geom_polygon(color='black') + 
+countyInjuriesMap <- ggplot(countyInj, aes(x = countyInj$long, y = countyInj$lat, group = group, fill = Injury, text = paste('County: ', countyInj$subregion))) + geom_polygon(color='black') + 
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + 
   scale_fill_gradient(high = "#132B43", low = "#56B1F7") + 
   theme(plot.title = element_blank(),
@@ -202,7 +202,7 @@ countyDeaths$fat <- countyDeaths$fat + countyDeaths$fat2 + countyDeaths$fat3 + c
 
 countyDeaths <- countyDeaths[order(countyDeaths$order),] 
 names(countyDeaths)[names(countyDeaths) == "fat"] = "Fatalities"
-countyDeathsMap <- ggplot(countyDeaths, aes(x = countyDeaths$long, y = countyDeaths$lat, group = group, fill = Fatalities)) + geom_polygon(color='black') + 
+countyDeathsMap <- ggplot(countyDeaths, aes(x = countyDeaths$long, y = countyDeaths$lat, group = group, fill = Fatalities, text = paste('County: ', countyDeaths$subregion))) + geom_polygon(color='black') + 
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
   scale_fill_gradient(high = "#132B43", low = "#56B1F7") +  
   theme(plot.title = element_blank(),
@@ -245,7 +245,7 @@ countyLoss$loss[countyLoss$loss == 6] <- "6: Between 50,000,000 and 500,000,000"
 countyLoss$loss[countyLoss$loss == 7] <- "7: Greater than 500,000,000"
 names(countyLoss)[names(countyLoss) == "loss"] = "Losses"
 
-countyLossMap <- ggplot(countyLoss, aes(x = countyLoss$long, y = countyLoss$lat, group = group, fill = Losses)) + geom_polygon(color='black') + 
+countyLossMap <- ggplot(countyLoss, aes(x = countyLoss$long, y = countyLoss$lat, group = group, fill = Losses, text = paste('County: ', countyLoss$subregion))) + geom_polygon(color='black') + 
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + 
   scale_fill_brewer(palette="Blues")+ theme(
     plot.title = element_blank(),
@@ -844,6 +844,104 @@ server <- function(input, output, session){
     ggplot(data = countyInfo, aes(x=countyInfo$County, y=countyInfo$Frequency))  +
       geom_bar(position="dodge", stat="identity", fill = "orange") + labs(x="County ", y = "# of Tornadoes") + theme(axis.text.x = element_text(angle = 90, vjust=0.5))
     
+  })
+  
+  
+  #Dania's output
+  
+  #data tables for part c bullets 6-8 for years, months, and hours
+  output$yearInjFatTable <- renderDataTable(
+    getTornadoInjFatPerYearTable(tornadoesIL), 
+    options = list(orderClasses = TRUE,
+                   pageLength = 10,  dom = 'tp')
+  )
+  
+  output$yearLossTable <- renderDataTable(
+    getTornadoLossPerYearTable(yearlyloss), 
+    options = list(orderClasses = TRUE,
+                   pageLength = 10,  dom = 'tp')
+  )
+  
+  output$monthInjFatTable <- renderDataTable(
+    getTornadoInjFatPerMonthTable(tornadoesIL), 
+    options = list(orderClasses = TRUE,
+                   pageLength = 10,  dom = 'tp')
+  )
+  
+  output$monthLossTable <- renderDataTable(
+    getTornadoLossPerMonthTable(monthlyloss), 
+    options = list(orderClasses = TRUE,
+                   pageLength = 10,  dom = 'tp')
+  )
+  
+  output$hourInjFatTable <- renderDataTable(
+    getTornadoInjFatPerHourTable(tornadoesIL), 
+    options = list(orderClasses = TRUE,
+                   pageLength = 10,  dom = 'tp')
+  )
+  
+  output$hourLossTable <- renderDataTable(
+    getTornadoLossPerHourTable(hourlyloss), 
+    options = list(orderClasses = TRUE,
+                   pageLength = 10,  dom = 'tp')
+  )
+  
+  #plots for part c bullets 6-8 for years, months, and hours
+  output$yearInjFatPlot <- renderPlotly({
+    tornadoData <- aggregate(tornadoesIL[,12:13],by=list(tornadoesIL$yr), FUN=sum)
+    names(tornadoData )[1]<-"year"
+    dynamic_bar_graph_grouped(tornadoData, tornadoData$year, 
+                              tornadoData$inj, "Injuries", 
+                              tornadoData$fat, "Fatalities", 
+                              "Year", "Total Damages", "", "Type of Damage")
+  })
+  
+  output$yearLossPlot <- renderPlotly({
+    dynamic_bar_graph_stacked(yearlyloss, yearlyloss$yr, yearlyloss$yrloss, yearlyloss$loss, 
+                              "Loss", "Year", "Tornadoes Per Year", "", "Year")
+    
+  })
+  
+  output$monthInjFatPlot <- renderPlotly({
+    tornadoData <- aggregate(tornadoesIL[,12:13],by=list(tornadoesIL$mo), FUN=sum)
+    names(tornadoData )[1]<-"month"
+    dynamic_bar_graph_grouped(tornadoData, tornadoData$month, 
+                              tornadoData$inj, "Injuries", 
+                              tornadoData$fat, "Fatalities", 
+                              "Month", "Total Damages", "", "Type of Damage")
+  })
+  
+  output$monthLossPlot <- renderPlotly({
+    dynamic_bar_graph_stacked(monthlyloss, monthlyloss$mo, monthlyloss$moloss, monthlyloss$loss,
+                              "Loss", "Month", "Tornadoes Per Month", "", "Month")
+    
+  })
+  
+  output$hourInjFatPlot <- renderPlotly({
+    tornadoData <- aggregate(tornadoesIL[,12:13],by=list(tornadoesIL$hr), FUN=sum)
+    names(tornadoData )[1]<-"hour"
+    dynamic_bar_graph_grouped(tornadoData, tornadoData$hour, 
+                              tornadoData$inj, "Injuries", 
+                              tornadoData$fat, "Fatalities", 
+                              "Hour of Day", "Total Damages", "", "Type of Damage")
+  })
+  
+  output$hourLossPlot <- renderPlotly({
+    dynamic_bar_graph_stacked(hourlyloss, hourlyloss$hr, hourlyloss$hrloss, hourlyloss$loss,
+                              "Loss", "Hour", "Tornadoes Per Hour", "", "Hour")   
+  })
+  
+  
+  output$injuryCountyPlot <- renderPlotly({
+    ggplotly(countyInjuriesMap)
+  })
+  
+  output$fatalityCountyPlot <- renderPlotly({
+    ggplotly(countyDeathsMap)
+  })
+  
+  output$lossCountyPlot <- renderPlotly({
+    ggplotly(countyLossMap)
   })
 }
 
