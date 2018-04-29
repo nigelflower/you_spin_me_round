@@ -76,15 +76,15 @@ ui <- dashboardPage(skin="black",
                                   box(width = 12)
                                 ),
                                 column(3,
-                                  box(width = 12,
+                                  box(width = 12, height = 1000,
                                       selectInput(inputId = "SelectState0", label = "State", choices = state.abb, selected = "IL"),
                                       uiOutput("reset0"),
-                                      leafletOutput("Leaf0")
+                                      leafletOutput("Leaf0",height = 800)
                                   ),  
-                                  box(width = 12,
+                                  box(width = 12, height = 1000,
                                       selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
                                       uiOutput("reset1"),
-                                      leafletOutput("Leaf1")
+                                      leafletOutput("Leaf1",height = 800)
                                   )
                                 ),
                                 
@@ -204,7 +204,7 @@ server <- function(input, output, session){
       setView(map, 
               lng = state0()[,"x"],
               lat = state0()[,"y"], 
-              zoom = 6) 
+              zoom = 7) 
     #addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
     #addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
     for(i in 1:nrow(dataset)){
