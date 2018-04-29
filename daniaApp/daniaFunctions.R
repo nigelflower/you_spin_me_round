@@ -438,34 +438,23 @@ countyLoss$loss4[is.na(countyLoss$loss4)] <- 0
 
 countyLoss$loss <- pmax(countyLoss$loss, countyLoss$loss2, countyLoss$loss3, countyLoss$loss4)
 countyLoss <- countyLoss[order(countyLoss$order),] 
+countyLoss$loss[countyLoss$loss == 0] <- "0: Unknown"
+countyLoss$loss[countyLoss$loss == 1] <- "1: Between 0 and 5,000"
+countyLoss$loss[countyLoss$loss == 2] <- "2: Between 5,000 and 50,000"
+countyLoss$loss[countyLoss$loss == 3] <- "3: Between 50,000 and 500,000"
+countyLoss$loss[countyLoss$loss == 4] <- "4: Between 500,000 and 5,000,000"
+countyLoss$loss[countyLoss$loss == 5] <- "5: Between 5,000,000 and 50,000,000"
+countyLoss$loss[countyLoss$loss == 6] <- "6: Between 50,000,000 and 500,000,000"
+countyLoss$loss[countyLoss$loss == 7] <- "7: Greater than 500,000,000"
 names(countyLoss)[names(countyLoss) == "loss"] = "Losses"
-countyLossMap <- ggplot(countyLoss, aes(x = countyLoss$long, y = countyLoss$lat, group = group, fill = factor(Losses))) + geom_polygon(color='black') + 
+
+countyLossMap <- ggplot(countyLoss, aes(x = countyLoss$long, y = countyLoss$lat, group = group, fill = Losses)) + geom_polygon(color='black') + 
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + 
-  scale_fill_brewer(palette="Reds")+ theme(
+  scale_fill_brewer(palette="Blues")+ theme(
     plot.title = element_blank(),
     axis.title.x = element_blank(),
     axis.title.y = element_blank())
 ggplotly(countyLossMap)
-
-
-p <- x %>%
-  group_by(group) %>%
-  plot_ly(x = ~long, y = ~lat, color = ~Injuries, colors = c('#ffffff','#000000'),  
-          hoverinfo = 'text', text = ~subregion) %>%
-  add_polygons(line = list(width = 0.4)) %>%
-  add_polygons(
-    fillcolor = 'transparent',
-    line = list(color = 'black', width = 0.5),
-    showlegend = FALSE
-  ) %>%
-  layout(
-    title = "Illinois Injuries by County",
-    titlefont = list(size = 10),
-    xaxis = list(title = "", showgrid = FALSE,
-                 zeroline = FALSE, showticklabels = FALSE),
-    yaxis = list(title = "", showgrid = FALSE,
-                 zeroline = FALSE, showticklabels = FALSE)
-  )
 
 
 # 2.) allow a user to compare the Illinois tabular data to data from any other 
