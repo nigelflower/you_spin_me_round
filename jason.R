@@ -16,8 +16,8 @@ hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
 # Maybe add in Thunderforest.SpinalMap for fun....
 provider_tiles <- c("Stamen Toner", "Open Topo Map", "Thunderforest Landscape", "Esri World Imagery", "Stamen Watercolor")
 
+## Some of Jasons data
 counties_names <- read.csv("counties.csv")
-
 IL_Code <- 17
 
 # Get IL tornadoes from file              
@@ -33,6 +33,7 @@ countyInfo <- data.frame(County=counties_names$County, Frequency= illinois_count
 ############################################
 #sorting by largest magnitude tornadoes
 magnitude_sorted <- illinois_tornadoes[order(-illinois_tornadoes[,11]),]
+magnitude_sorted10 <- head(magnitude_sorted,10)
 
 ui <- dashboardPage(skin="black",
                     dashboardHeader(title = "You Spin me Round"),
@@ -144,7 +145,7 @@ ui <- dashboardPage(skin="black",
                                 ),
                                 
                                 fluidRow(
-                                  box(title = "Illinois 10 most destructive tornadoes", solidHeader = TRUE, status = "primary", width = 12,
+                                  box(title = "Illinois 10 Most Powerful/Destructive tornadoes", solidHeader = TRUE, status = "primary", width = 12,
                                       #selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
                                       uiOutput("reset2"),
                                       leafletOutput("Leaf10Most")
@@ -379,7 +380,7 @@ server <- function(input, output, session){
               zoom = 6) %>%
       addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
       addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
-    dataset <- subset(magnitude_sorted,  elat != 0.00 & elon != 0.00)
+      dataset <- subset(dataset,  elat != 0.00 & elon != 0.00)
     
     for(i in 1:nrow(dataset)){
       map <- addPolylines(map, lat = as.numeric(dataset[i, c(16, 18)]), lng = as.numeric(dataset[i, c(17, 19)]), weight=1)
