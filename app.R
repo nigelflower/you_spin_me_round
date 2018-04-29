@@ -78,7 +78,6 @@ ui <- dashboardPage(skin="black",
                                 column(3,
                                   box(width = 12,
                                       selectInput(inputId = "SelectState0", label = "State", choices = state.abb, selected = "IL"),
-                                      selectInput(inputId = "MapSelect", label="Select Map Type", choices = provider_tiles, selected="Stamen Toner"),
                                       uiOutput("reset0"),
                                       leafletOutput("Leaf0")
                                   ),  
@@ -92,6 +91,7 @@ ui <- dashboardPage(skin="black",
                                 column(2,
                                        sliderInput(inputId = "compYear", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = ""),
                                        sliderInput(inputId = 'compMonth', label = "Month(s)", min = 1, max = 12, value = c(1,12), step = 1, animate = TRUE, sep = ""),
+                                       selectInput(inputId = "MapSelect", label="Select Map Type", choices = provider_tiles, selected="Stamen Toner"),
                                        checkboxGroupInput("magnitudeFilter",
                                                           h3("Filter by Magnitude"),
                                                           choices = list("unknown" = -9, 
@@ -122,40 +122,28 @@ server <- function(input, output, session){
   # TODO: clean Reactive Variables
   reactiveData <- reactive({
     # Things to constrain by:
-    #  Year
-    #  width
-    #  length
-    #  injury
+    # Subset by Year
+    dataset <- subset(tornadoes, yr == input$compYear)
+    # Subset by Month
+    #dataset <- subset(tornadoes, yr == input$compMonth)
+    # Subset by Width
+    wid_min <- input$compWidth[1]
+    wid_max <- input$compWidth[2]
+    dataset <- subset(dataset, wid >= wid_min, wid <= wid_max)
+    # Subset by Length
+    len_min <- input$compLength[1]
+    len_max <- input$compLength[2]
+    dataset <- subset(dataset, len >= len_min & len <= len_max)
+    # Subset by Injuries
+    inj_min <- input$compInj[1]
+    inj_max <- input$compInj[2]
+    dataset <- subset(dataset, inj >= inj_min & inj <= inj_max)
     #  fatalities
-    #  Loss
     
-    dataset <- subset()
-  })
-  # Variables for selecting state and lat/lon (separate from tornado dataset)
-  state0 <- reactive({
-    states[state.abb == input$SelectState0,]
-  })
-  state1 <- reactive({
-    states[state.abb == input$SelectState1,]
-  })
-  
-  heatmapState0 <- reactive({
-    states[state.abb == input$HeatmapState0,]
-  })
-  
-  heatmapState1 <- reactive({
-    states[state.abb == input$HeatmapState1,]
-  })
-  
-  
-  # Plot output
-  output$Leaf0 <- renderLeaflet({
-    # Subset by Year And State
-    dataset <- subset(tornadoes, st == input$SelectState0)
-    dataset <- subset(dataset, yr == input$compYear)
-    
-    # Remove zero data
-    dataset <- subset(dataset, slat != 0 & slon != 0 & elat != 0 & elon != 0 )
+    # Subset by Loss
+    loss_min <- input$compLoss[1]
+    loss_max <- input$compLoss[2]
+    dataset <- subset(dataset, loss >= loss_min & loss <= loss_max)
     
     # Subset by Magnitude
     mag_filter <- input$magnitudeFilter
@@ -165,26 +153,26 @@ server <- function(input, output, session){
       print(strtoi(input$magnitudeFilter))
     }
     
-    # Subset by Width
-    wid_min <- input$compWidth[1]
-    wid_max <- input$compWidth[2]
-    dataset <- subset(dataset, wid >= wid_min, wid <= wid_max)
+    dataset
+  })
+  # Variables for selecting state and lat/lon (separate from tornado dataset)
+  state0 <- reactive({
+    states[state.abb == input$SelectState0,]
+  })
+  state1 <- reactive({
+    states[state.abb == input$SelectState1,]
+  })
+  
+  
+  # Plot output
+  output$Leaf0 <- renderLeaflet({
+    # Subset by Year And State
+    dataset <- reactiveData()
+    dataset <- subset(dataset, st == input$SelectState0)
     
-    # Subset by Length
-    len_min <- input$compLength[1]
-    len_max <- input$compLength[2]
-    dataset <- subset(dataset, len >= len_min & len <= len_max)
+    # Remove zero data
+    dataset <- subset(dataset, slat != 0 & slon != 0 & elat != 0 & elon != 0 )
     
-    
-    # Subset by Injuries
-    inj_min <- input$compInj[1]
-    inj_max <- input$compInj[2]
-    dataset <- subset(dataset, inj >= inj_min & inj <= inj_max)
-    
-    # Subset by Loss
-    loss_min <- input$compLoss[1]
-    loss_max <- input$compLoss[2]
-    dataset <- subset(dataset, loss >= loss_min & loss <= loss_max)
     
     # Select Provider Tiles
     if(input$MapSelect == "Stamen Toner"){
@@ -226,22 +214,45 @@ server <- function(input, output, session){
   })
   
   output$Leaf1 <- renderLeaflet({
+    dataset <- reactiveData()
+    dataset <- subset(dataset, st == input$SelectState1)
+    # Remove zero data
+    dataset <- subset(dataset, slat != 0 & slon != 0 & elat != 0 & elon != 0 )
     
-    dataset <- subset(tornadoes, st == input$SelectState1)
-    dataset <- subset(dataset, yr == input$Slider0)
+    # Select Provider Tiles
+    if(input$MapSelect == "Stamen Toner"){
+      tiles <- providers$Stamen.Toner
+    }
+    else if(input$MapSelect == "Open Topo Map"){
+      tiles <- providers$OpenTopoMap
+      
+    }
+    else if(input$MapSelect == "Thunderforest Landscape"){
+      tiles <- providers$Thunderforest.Landscape
+      
+    }
+    else if(input$MapSelect == "Esri World Imagery"){
+      tiles <- providers$Esri.WorldImagery
+      
+    }
+    else if(input$MapSelect == "Stamen Watercolor"){
+      tiles <- providers$Stamen.Watercolor
+    }
+    else{
+      tiles <- providers$Stamen.Toner
+    }
+    
     map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
       addTiles() %>% 
-      
-      # Select leaflet provider tiles from user input
-      addProviderTiles(providers$Stamen.TonerLite) %>%
-      
+      addProviderTiles(tiles) %>%
       setView(map, 
               lng = state1()[,"x"], 
               lat = state1()[,"y"], 
-              zoom = 6) %>%
-      addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
-      addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
-    map
+              zoom = 6) 
+      for(i in 1:nrow(dataset)){
+        map <- addPolylines(map, lat = as.numeric(dataset[i,c('slat','elat')]),lng = as.numeric(dataset[i,c('slon','elon')]))
+      }
+      map
   })
   
 }
