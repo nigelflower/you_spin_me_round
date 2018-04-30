@@ -487,12 +487,12 @@ ui <- dashboardPage(skin="black",
                                     ),
                                     fluidRow(
                                       box(title="Tornado Injuries and Fatalities Per Year",
-                                          plotlyOutput("yearInjFatPlot"), width=12)
+                                          plotlyOutput("yearInjFatPlot", height = "700px"), width=12)
                                     ),
                                     
                                     fluidRow(
                                       box(title="Tornado Monetary Loss Range Per Year",
-                                          plotlyOutput("yearLossPlot"), width=12)
+                                          plotlyOutput("yearLossPlot", height = "700px"), width=12)
                                     )
                                     
                             ),
@@ -505,12 +505,12 @@ ui <- dashboardPage(skin="black",
                                     ),
                                     fluidRow(
                                       box(title="Tornado Injuries and Fatalities Per Month",
-                                          plotlyOutput("monthInjFatPlot"), width=12)
+                                          plotlyOutput("monthInjFatPlot", height = "700px"), width=12)
                                     ),
                                     
                                     fluidRow(
                                       box(title="Tornado Monetary Loss Range Per Month",
-                                          plotlyOutput("monthLossPlot"), width=12)
+                                          plotlyOutput("monthLossPlot", height = "700px"), width=12)
                                     )
                                     
                             ),
