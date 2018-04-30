@@ -366,7 +366,7 @@ ui <- dashboardPage(skin="black",
                                                  icon=icon("hourglass"))
                             ),
                             menuItem("Illinois", tabName="Illinois"),
-                            menuItem("TestLeaf", tabName = "TestLeaf"),
+                            menuItem("Compare States", tabName = "CompareStates"),
                             menuItem("Heatmap", tabName="Heatmap")
                         )
                     ),
@@ -524,61 +524,46 @@ ui <- dashboardPage(skin="black",
                                     
                             ),
                             
-                            tabItem(tabName="TestLeaf",
-                                    h2("Testing area for Leaflet Plotting"),
-                                    fluidRow(
-                                        box(width = 12,
-                                            sliderInput(inputId = "Slider0", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = "")
-                                        )
+                            tabItem(tabName="CompareStates",
+                                    column(3,
+                                           box(width = 12),
+                                           box(width = 12)
+                                    ),
+                                    column(4,
+                                           box(width = 12),
+                                           box(width = 12)
+                                    ),
+                                    column(3,
+                                           box(width = 12, height = 1000,
+                                               selectInput(inputId = "SelectState0", label = "State", choices = state.abb, selected = "IL"),
+                                               uiOutput("reset0"),
+                                               leafletOutput("Leaf0",height = 800)
+                                           ),  
+                                           box(width = 12, height = 1000,
+                                               selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
+                                               uiOutput("reset1"),
+                                               leafletOutput("Leaf1",height = 800)
+                                           )
                                     ),
                                     
-                                    fluidRow(
-                                        # Filter by Magnitude
-                                        column(2,
-                                               checkboxGroupInput("magnitudeFilter",
-                                                                  h3("Filter by Magnitude"),
-                                                                  choices = list("-9" = -9, 
-                                                                                 "0" = 0, 
-                                                                                 "1" = 1, 
-                                                                                 "2" = 2, 
-                                                                                 "3" = 3, 
-                                                                                 "4" = 4,
-                                                                                 "5" = 5))
-                                        ),
-                                        
-                                        # Filter by Width
-                                        column(2,
-                                               box(sliderInput("widthSlider", "Filter By Width", 0, 4576, 4576))
-                                        ),
-                                        
-                                        # Filter by Length
-                                        column(2,
-                                               sliderInput("lengthSlider", "Filter By Length", 0, 234, 234)
-                                        ),
-                                        
-                                        # Filter by Injuries
-                                        column(2,
-                                               sliderInput("injurySlider", "Filter By Injuries", 0, 1740, 1740)
-                                        ),
-                                        
-                                        # Filter by Loss
-                                        column(2,
-                                               sliderInput("lossSlider", "Filter By Losses", 0, 22000000, 22000000)
-                                        )
-                                    ),
-                                    
-                                    fluidRow(
-                                        box(width = 6,
-                                            selectInput(inputId = "SelectState0", label = "State", choices = state.abb, selected = "IL"),
-                                            selectInput(inputId = "MapSelect", label="Select Map Type", choices = provider_tiles, selected="Stamen Toner"),
-                                            uiOutput("reset0"),
-                                            leafletOutput("Leaf0")
-                                        ),
-                                        box(width = 6,
-                                            selectInput(inputId = "SelectState1", label = "State", choices = state.abb, selected = "IL"),
-                                            uiOutput("reset1"),
-                                            leafletOutput("Leaf1")
-                                        )
+                                    column(2,
+                                           sliderInput(inputId = "compYear", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = ""),
+                                           sliderInput(inputId = 'compMonth', label = "Month(s)", min = 1, max = 12, value = c(1,12), step = 1, animate = TRUE, sep = ""),
+                                           selectInput(inputId = "MapSelect", label="Select Map Type", choices = provider_tiles, selected="Stamen Toner"),
+                                           checkboxGroupInput("magnitudeFilter",
+                                                              h3("Filter by Magnitude"),
+                                                              choices = list("unknown" = -9, 
+                                                                             "0" = 0, 
+                                                                             "1" = 1, 
+                                                                             "2" = 2, 
+                                                                             "3" = 3, 
+                                                                             "4" = 4,
+                                                                             "5" = 5),inline = TRUE),
+                                           sliderInput("compWidth", "Filter By Width", min = 0, max = 4576, c(0, 4576)),
+                                           sliderInput("compLength", "Filter By Length", min = 0, max = 234, value = c(0,234)),
+                                           sliderInput("compInj", "Filter By Injuries", min = 0, max = 1740, value = c(0,1740)),
+                                           sliderInput("compLoss", "Filter By Losses", min = 0, max = 22000000, value = c(0,22000000), pre = "$", sep = "," )
+                                           
                                     )
                             ),
                             
@@ -601,8 +586,13 @@ ui <- dashboardPage(skin="black",
 
 # Ryan's variables pre-server
 
+# Read in lat/lon of each state's center
 states <- data.frame(state.name,state.abb,state.center[1],state.center[2])
-fips <- state.fips
+# Fix Alaska and Hawaii
+states[state.abb == "AK",][3] <- -149.4937
+states[state.abb == "AK",][4] <- 64.2008
+states[state.abb == "HI",][3] <- -155.5828
+states[state.abb == "HI",][4] <- 19.8968
 
 server <- function(input, output, session){
   
@@ -678,18 +668,40 @@ server <- function(input, output, session){
   
   
   # Ryan Leaflet Server Code
-  
-  # TODO: clean Reactive Variables
   reactiveData <- reactive({
     # Things to constrain by:
-    #  Year
-    #  width
-    #  length
-    #  injury
+    # Subset by Year
+    dataset <- subset(tornadoes, yr == input$compYear)
+    # Subset by Month
+    dataset <- subset(dataset, mo >= input$compMonth[1] & mo <= input$compMonth[2])
+    # Subset by Width
+    wid_min <- input$compWidth[1]
+    wid_max <- input$compWidth[2]
+    dataset <- subset(dataset, wid >= wid_min & wid <= wid_max)
+    # Subset by Length
+    len_min <- input$compLength[1]
+    len_max <- input$compLength[2]
+    dataset <- subset(dataset, len >= len_min & len <= len_max)
+    # Subset by Injuries
+    inj_min <- input$compInj[1]
+    inj_max <- input$compInj[2]
+    dataset <- subset(dataset, inj >= inj_min & inj <= inj_max)
     #  fatalities
-    #  Loss
     
-    dataset <- subset()
+    # Subset by Loss
+    loss_min <- input$compLoss[1]
+    loss_max <- input$compLoss[2]
+    dataset <- subset(dataset, loss >= loss_min & loss <= loss_max)
+    
+    # Subset by Magnitude
+    mag_filter <- input$magnitudeFilter
+    
+    if(!is.null(mag_filter)){
+      dataset <- subset(dataset, mag %in% mag_filter)
+      print(strtoi(input$magnitudeFilter))
+    }
+    
+    dataset
   })
   # Variables for selecting state and lat/lon (separate from tornado dataset)
   state0 <- reactive({
@@ -703,33 +715,12 @@ server <- function(input, output, session){
   # Plot output
   output$Leaf0 <- renderLeaflet({
     # Subset by Year And State
-    dataset <- subset(tornadoes, st == input$SelectState0)
-    dataset <- subset(dataset, yr <= input$Slider0)
+    dataset <- reactiveData()
+    dataset <- subset(dataset, st == input$SelectState0)
     
-    # Subset by Magnitude
-    mag_filter <- input$magnitudeFilter
+    # Remove zero data
+    dataset <- subset(dataset, slat != 0 & slon != 0 & elat != 0 & elon != 0 )
     
-    if(!is.null(mag_filter)){
-      dataset <- subset(dataset, mag %in% mag_filter)
-      print(strtoi(input$magnitudeFilter))
-    }
-    
-    # Subset by Width
-    wid_filter <- input$widthSlider
-    dataset <- subset(dataset, wid < wid_filter)
-    
-    # Subset by Length
-    len_filter <- input$lengthSlider
-    dataset <- subset(dataset, len < len_filter)
-    print(len_filter)
-    
-    # Subset by Injuries
-    inj_filter <- input$injurySlider
-    dataset <- subset(dataset, inj < inj_filter)
-    
-    # Subset by Loss
-    loss_filter <- input$lossSlider
-    dataset <- subset(dataset, loss < loss_filter)
     
     # Select Provider Tiles
     if(input$MapSelect == "Stamen Toner"){
@@ -761,34 +752,59 @@ server <- function(input, output, session){
       setView(map, 
               lng = state0()[,"x"],
               lat = state0()[,"y"], 
-              zoom = 6) %>%
-      addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
-      addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
-    dataset <- subset(dataset,  elat != 0.00 & elon != 0.00)
-    
+              zoom = 7) 
+    #addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
+    #addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
     for(i in 1:nrow(dataset)){
-      map <- addPolylines(map, lat = as.numeric(dataset[i, c(16, 18)]), lng = as.numeric(dataset[i, c(17, 19)]), weight=1)
+      map <- addPolylines(map, lat = as.numeric(dataset[i,c('slat','elat')]),lng = as.numeric(dataset[i,c('slon','elon')]),
+                          opacity = .2*((as.numeric(dataset[i,'mag'])+1))
+      )
+      
     }
     map
   })
   
   output$Leaf1 <- renderLeaflet({
+    dataset <- reactiveData()
+    dataset <- subset(dataset, st == input$SelectState1)
+    # Remove zero data
+    dataset <- subset(dataset, slat != 0 & slon != 0 & elat != 0 & elon != 0 )
     
-    dataset <- subset(tornadoes, st == input$SelectState1)
-    dataset <- subset(dataset, yr == input$Slider0)
+    # Select Provider Tiles
+    if(input$MapSelect == "Stamen Toner"){
+      tiles <- providers$Stamen.Toner
+    }
+    else if(input$MapSelect == "Open Topo Map"){
+      tiles <- providers$OpenTopoMap
+      
+    }
+    else if(input$MapSelect == "Thunderforest Landscape"){
+      tiles <- providers$Thunderforest.Landscape
+      
+    }
+    else if(input$MapSelect == "Esri World Imagery"){
+      tiles <- providers$Esri.WorldImagery
+      
+    }
+    else if(input$MapSelect == "Stamen Watercolor"){
+      tiles <- providers$Stamen.Watercolor
+    }
+    else{
+      tiles <- providers$Stamen.Toner
+    }
+    
     map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
       addTiles() %>% 
-      
-      # Select leaflet provider tiles from user input
-      addProviderTiles(providers$Stamen.TonerLite) %>%
-      
+      addProviderTiles(tiles) %>%
       setView(map, 
               lng = state1()[,"x"], 
               lat = state1()[,"y"], 
-              zoom = 6) %>%
-      addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
-      addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
-    
+              zoom = 6) 
+    for(i in 1:nrow(dataset)){
+      map <- addPolylines(map, lat = as.numeric(dataset[i,c('slat','elat')]),lng = as.numeric(dataset[i,c('slon','elon')]), 
+                          weight = 3*(as.numeric(dataset[i,'mag'])+1)
+      )
+    }
     map
   })
   
