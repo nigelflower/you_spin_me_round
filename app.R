@@ -575,11 +575,11 @@ ui <- dashboardPage(skin="black",
                                                )
                                     ),
                                     column(4,
-                                           box(width = 12,
-                                               dataTableOutput("stateChart0")
+                                           box(width = 12, height = 1000,
+                                               plotlyOutput("stateChart0")
                                            ),
-                                           box(width = 12,
-                                               dataTableOutput("stateChart1")
+                                           box(width = 12, height = 1000,
+                                               plotlyOutput("stateChart1")
                                            )
                                     ),
                                     column(3,
@@ -794,7 +794,6 @@ server <- function(input, output, session){
   output$stateTable0 <- renderDataTable({
     dataset <- reactiveData()
     dataset <- subset(dataset, st == input$SelectState0)
-    dataset <- subset(dataset)
     as.data.frame(dataset[,c(5,6,11,12,13,14,20,21)])
   },options = list(searching = FALSE,lengthChange = FALSE)
   )
@@ -802,11 +801,36 @@ server <- function(input, output, session){
   output$stateTable1 <- renderDataTable({
     dataset <- reactiveData()
     dataset <- subset(dataset, st == input$SelectState1)
-    dataset <- subset(dataset)
     as.data.frame(dataset[,c(5,6,11,12,13,14,20,21)])
   },options = list(searching = FALSE,lengthChange = FALSE)
   )
   
+  output$stateChart0 <- renderPlotly({
+    dataset <- reactiveData()
+    as.data.frame(dataset[,c(11,12,13,14)]) %>%
+    plot_ly(width = "100%", height = 900) %>%
+      add_trace(type = 'parcoords',
+                line = list(color = "blue",
+                            colorscale = 'Jet',
+                            showscale = TRUE,
+                            reversescale = TRUE,
+                            cmin = -4000,
+                            cmax = -100),
+                dimensions = list(
+                  list(range = c(~min(mag),~max(mag)),
+                       label = 'Magnitude', values = ~mag),
+                  list(range = c(~min(inj),~max(inj)),
+                       label = 'Injuries', values = ~inj),
+                  list(range = c(~min(fat),~max(fat)),
+                       label = 'Fatalities', values = ~fat),
+                  list(range = c(~min(loss),~max(loss)),
+                       label = 'Loss', values = ~loss)
+                )
+      )
+  })
+  output$stateChart1 <- renderPlotly({
+    
+  })
   
   output$Leaf0 <- renderLeaflet({
     # Subset by Year And State
