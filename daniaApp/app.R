@@ -19,8 +19,9 @@ hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
 # Maybe add in Thunderforest.SpinalMap for fun....
 provider_tiles <- c("Stamen Toner", "Open Topo Map", "Thunderforest Landscape", "Esri World Imagery", "Stamen Watercolor")
 
-counties_names <- read.csv("counties.csv")
+############################## Some of Jasons data ##########################################
 
+counties_names <- read.csv("counties.csv")
 IL_Code <- 17
 
 # Get IL tornadoes from file              
@@ -32,6 +33,17 @@ illinois_counties <- illinois_counties[-c(1), ]
 names(illinois_counties) <- c("Code", "Frequency")
 
 countyInfo <- data.frame(County=counties_names$County, Frequency= illinois_counties$Frequency)
+
+############################################
+#sorting by largest magnitude tornadoes
+magnitude_sorted <- illinois_tornadoes[order(-illinois_tornadoes[,11]),]
+magnitude_sorted10 <- head(magnitude_sorted,10)
+
+injuries_sorted <- illinois_tornadoes[order(-illinois_tornadoes[,12]),]
+injuries_sorted10 <- head(injuries_sorted,10)
+
+fatalities_sorted <- illinois_tornadoes[order(-illinois_tornadoes[,13]),]
+fatalities_sorted10 <-head(fatalities_sorted, 10)
 
 #dania's code
 fips <- read.csv(file="US_FIPS_Codes.csv", header=TRUE, sep=",")
@@ -54,23 +66,23 @@ tornadoesIL$countyNamef4 <- tolower(tornadoesIL$countyNamef4)
 
 #Changing the data for loss column of tornadoes to be categorical 0-7
 tornadoesIL$loss <- ifelse(tornadoesIL$yr >= 2016, 
-                    (ifelse(tornadoesIL$loss >  0 & tornadoesIL$loss < 5000,1,
-                    (ifelse(tornadoesIL$loss >= 5000 & tornadoesIL$loss < 50000,2,
-                    (ifelse(tornadoesIL$loss >= 50000 & tornadoesIL$loss < 500000,3,
-                    (ifelse(tornadoesIL$loss >= 500000 & tornadoesIL$loss < 5000000,4,
-                    (ifelse(tornadoesIL$loss >= 5000000 & tornadoesIL$loss < 50000000,5,
-                    (ifelse(tornadoesIL$loss >= 50000000 & tornadoesIL$loss < 50000000,6,
-                    (ifelse(tornadoesIL$loss >= 50000000,7 , 0)))))))))))))), 
-                  ifelse(tornadoesIL$yr >= 1996, 
-                    (ifelse(tornadoesIL$loss >  0 & tornadoesIL$loss < 0.005, 1,
-                    (ifelse(tornadoesIL$loss >= 0.005 & tornadoesIL$loss < 0.05,2,
-                    (ifelse(tornadoesIL$loss >= 0.05 & tornadoesIL$loss < 0.5,3,
-                    (ifelse(tornadoesIL$loss >= 0.5 & tornadoesIL$loss < 5,4,
-                    (ifelse(tornadoesIL$loss >= 5 & tornadoesIL$loss < 50,5,
-                    (ifelse(tornadoesIL$loss >= 50 & tornadoesIL$loss < 500,6,
-                    (ifelse(tornadoesIL$loss >= 500,7 , 0)))))))))))))), 
-                  (ifelse(tornadoesIL$loss <= 3, 
-                    (ifelse(tornadoesIL$loss > 0, 1, 0)), tornadoesIL$loss - 2))))
+                           (ifelse(tornadoesIL$loss >  0 & tornadoesIL$loss < 5000,1,
+                                   (ifelse(tornadoesIL$loss >= 5000 & tornadoesIL$loss < 50000,2,
+                                           (ifelse(tornadoesIL$loss >= 50000 & tornadoesIL$loss < 500000,3,
+                                                   (ifelse(tornadoesIL$loss >= 500000 & tornadoesIL$loss < 5000000,4,
+                                                           (ifelse(tornadoesIL$loss >= 5000000 & tornadoesIL$loss < 50000000,5,
+                                                                   (ifelse(tornadoesIL$loss >= 50000000 & tornadoesIL$loss < 50000000,6,
+                                                                           (ifelse(tornadoesIL$loss >= 50000000,7 , 0)))))))))))))), 
+                           ifelse(tornadoesIL$yr >= 1996, 
+                                  (ifelse(tornadoesIL$loss >  0 & tornadoesIL$loss < 0.005, 1,
+                                          (ifelse(tornadoesIL$loss >= 0.005 & tornadoesIL$loss < 0.05,2,
+                                                  (ifelse(tornadoesIL$loss >= 0.05 & tornadoesIL$loss < 0.5,3,
+                                                          (ifelse(tornadoesIL$loss >= 0.5 & tornadoesIL$loss < 5,4,
+                                                                  (ifelse(tornadoesIL$loss >= 5 & tornadoesIL$loss < 50,5,
+                                                                          (ifelse(tornadoesIL$loss >= 50 & tornadoesIL$loss < 500,6,
+                                                                                  (ifelse(tornadoesIL$loss >= 500,7 , 0)))))))))))))), 
+                                  (ifelse(tornadoesIL$loss <= 3, 
+                                          (ifelse(tornadoesIL$loss > 0, 1, 0)), tornadoesIL$loss - 2))))
 
 #helper function to calculate the amount of tornadoes that had a certain loss range 
 countLoss <- function(loss){
@@ -155,7 +167,7 @@ countyInj$inj <- countyInj$inj + countyInj$inj2 + countyInj$inj3 + countyInj$inj
 
 countyInj<- countyInj[order(countyInj$order),] 
 names(countyInj)[names(countyInj) == "inj"] = "Injury"
-countyInjuriesMap <- ggplot(countyInj, aes(x = countyInj$long, y = countyInj$lat, group = group, fill = Injury)) + geom_polygon(color='black') + 
+countyInjuriesMap <- ggplot(countyInj, aes(x = countyInj$long, y = countyInj$lat, group = group, fill = Injury, text = paste('County: ', countyInj$subregion))) + geom_polygon(color='black') + 
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + 
   scale_fill_gradient(high = "#132B43", low = "#56B1F7") + 
   theme(plot.title = element_blank(),
@@ -190,7 +202,7 @@ countyDeaths$fat <- countyDeaths$fat + countyDeaths$fat2 + countyDeaths$fat3 + c
 
 countyDeaths <- countyDeaths[order(countyDeaths$order),] 
 names(countyDeaths)[names(countyDeaths) == "fat"] = "Fatalities"
-countyDeathsMap <- ggplot(countyDeaths, aes(x = countyDeaths$long, y = countyDeaths$lat, group = group, fill = Fatalities)) + geom_polygon(color='black') + 
+countyDeathsMap <- ggplot(countyDeaths, aes(x = countyDeaths$long, y = countyDeaths$lat, group = group, fill = Fatalities, text = paste('County: ', countyDeaths$subregion))) + geom_polygon(color='black') + 
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
   scale_fill_gradient(high = "#132B43", low = "#56B1F7") +  
   theme(plot.title = element_blank(),
@@ -233,7 +245,7 @@ countyLoss$loss[countyLoss$loss == 6] <- "6: Between 50,000,000 and 500,000,000"
 countyLoss$loss[countyLoss$loss == 7] <- "7: Greater than 500,000,000"
 names(countyLoss)[names(countyLoss) == "loss"] = "Losses"
 
-countyLossMap <- ggplot(countyLoss, aes(x = countyLoss$long, y = countyLoss$lat, group = group, fill = Losses)) + geom_polygon(color='black') + 
+countyLossMap <- ggplot(countyLoss, aes(x = countyLoss$long, y = countyLoss$lat, group = group, fill = Losses, text = paste('County: ', countyLoss$subregion))) + geom_polygon(color='black') + 
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + 
   scale_fill_brewer(palette="Blues")+ theme(
     plot.title = element_blank(),
@@ -351,7 +363,10 @@ ui <- dashboardPage(skin="black",
                                              icon=icon("calendar")),
                                  menuSubItem("Hour", 
                                              tabName="HourDamages",
-                                             icon=icon("hourglass"))
+                                             icon=icon("hourglass")),
+                                 menuSubItem("County", 
+                                             tabName="CountyDamages",
+                                             icon=icon("map"))
                         ),
                         menuItem("Illinois", tabName="Illinois"),
                         menuItem("TestLeaf", tabName = "TestLeaf"),
@@ -363,7 +378,7 @@ ui <- dashboardPage(skin="black",
                       tabItems(
                         tabItem(tabName = "About",
                                 h1(style = "font-size: 300%","Project 3: You Spin me Round"),
-                                h4(style = "font-size: 100%","by: Dania Azhari, Nigel Flower, Jason Guo,  Ryan Nishimoto"),
+                                h4(style = "font-size: 100%","by: Daria Azhari, Nigel Flower, Jason Guo,  Ryan Nishimoto"),
                                 h4(style = "font-size: 150%",a(href = "https://sites.google.com/uic.edu/nishimo1/cs424/project03", "Project Website")),
                                 h2(style = "font-size: 200%","CS 424: Visualization and Visual Analytics"),
                                 h4(style = "font-size: 150%",a(href = "https://www.evl.uic.edu/aej/424/", "Course website"))
@@ -378,14 +393,6 @@ ui <- dashboardPage(skin="black",
                                 fluidRow(
                                   box(title="Percentage of Magnitudes by Year",
                                       plotOutput("year_magnitude_percentage"), width=12)
-                                ),
-                                fluidRow(
-                                  box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
-                                      dataTableOutput("countyTable"))
-                                ),
-                                fluidRow(
-                                  box(title = "Tornado Counties Graph", solidHeader = TRUE, status = "primary", width = 12,
-                                      plotOutput("countyChart"))
                                 )
                         ),
                         
@@ -434,7 +441,6 @@ ui <- dashboardPage(skin="black",
                                   )
                                 )
                         ),
-                        
                         tabItem(tabName="YearDamages",
                                 fluidRow(
                                   box(title = "Tornado Injuries Per Year in Illinois", solidHeader = TRUE, status = "primary", width = 6,
@@ -492,14 +498,33 @@ ui <- dashboardPage(skin="black",
                                 )
                                 
                         ),
-                        tabItem(tabName="Illinois",
+                        tabItem(tabName="CountyDamages",
                                 fluidRow(
                                   box(title="Illinois Injuries Per County",
-                                      plotlyOutput("injuryCountyPlot"), width=4),
+                                      plotlyOutput("injuryCountyPlot", height = "1500px"), width=4),
                                   box(title="Illinois Fatalities Per County",
-                                      plotlyOutput("fatalityCountyPlot"), width=4),
+                                      plotlyOutput("fatalityCountyPlot", height = "1500px"), width=4),
                                   box(title="Illinois Loss Per County",
-                                      plotlyOutput("lossCountyPlot"), width=4)
+                                      plotlyOutput("lossCountyPlot", height = "1500px"), width=4)
+                                )
+                        ),
+                        tabItem(tabName="Illinois",
+                                fluidRow(
+                                  box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
+                                      dataTableOutput("countyTable"))
+                                ),
+                                
+                                fluidRow(
+                                  box(title = "Tornado Counties Graph", solidHeader = TRUE, status = "primary", width = 12,
+                                      plotOutput("countyChart"))
+                                ),
+                                
+                                fluidRow(
+                                  box(title = "Illinois 10 Most Powerful/Destructive tornadoes", solidHeader = TRUE, status = "primary", width = 12,
+                                      selectInput("top10", "Choose to view by criteria:", choices = c('Magnitude'='1','Fatality'='2', 'Injury' = '3'), selected = 'Magnitude'),
+                                      uiOutput("reset2"),
+                                      leafletOutput("Leaf10Most")
+                                  )
                                 )
                         ),
                         
@@ -591,7 +616,7 @@ server <- function(input, output, session){
     ggplot(data=year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') + 
       theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
       xlab("Year") + ylab("Total Earthquakes") + 
-      guides(fill=guide_legend(title="Magnitude"))
+      guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
   })
   
   output$year_magnitude_percentage <- renderPlot({
@@ -600,7 +625,7 @@ server <- function(input, output, session){
     melted_ymp <- melt(as.matrix(year_mag_per))
     
     ggplot(data=melted_ymp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
-      xlab("Year") + ylab("Percentage of Magnitudes")
+      xlab("Year") + ylab("Percentage of Magnitudes") + scale_color_brewer(palette="Set3")
     
   })
   
@@ -610,7 +635,7 @@ server <- function(input, output, session){
     ggplot(data=mo_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') +
       theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
       xlab("Month") + ylab("Total Tornadoes") + 
-      guides(fill=guide_legend(title="Magnitude"))
+      guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
     
   })
   
@@ -620,7 +645,7 @@ server <- function(input, output, session){
     melted_mmp <- melt(as.matrix(mo_mag_per))
     
     ggplot(data=melted_mmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
-      xlab("Month") + ylab("Percentage of Magnitudes")
+      xlab("Month") + ylab("Percentage of Magnitudes") + scale_color_brewer(palette="Set3")
     
   })
   
@@ -630,7 +655,7 @@ server <- function(input, output, session){
     ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
       theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
       xlab("Hour of Day") + ylab("Total Tornadoes") + 
-      guides(fill=guide_legend(title="Magnitude"))
+      guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
     
   })
   
@@ -642,7 +667,7 @@ server <- function(input, output, session){
     
     ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
       xlab("Hours") + ylab("Percentage of Magnitudes") +
-      guides(fill=guide_legend(title="Magnitude"))
+      guides(fill=guide_legend(title="Magnitude")) + scale_color_brewer(palette="Set3")
   })
   
   output$distance_magnitude <- renderPlot({
@@ -652,7 +677,7 @@ server <- function(input, output, session){
     ggplot(data=filt_year_mag, aes(x=Var1, y=Freq, fill=Var2)) + geom_bar(stat='identity') + 
       theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
       xlab("Year") + ylab("Total Tornadoes") + 
-      guides(fill=guide_legend(title="Magnitude"))
+      guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
   })
   
   
@@ -678,13 +703,6 @@ server <- function(input, output, session){
     states[state.abb == input$SelectState1,]
   })
   
-  heatmapState0 <- reactive({
-    states[state.abb == input$HeatmapState0,]
-  })
-  
-  heatmapState1 <- reactive({
-    states[state.abb == input$HeatmapState1,]
-  })
   
   # Plot output
   output$Leaf0 <- renderLeaflet({
@@ -748,8 +766,13 @@ server <- function(input, output, session){
               lng = state0()[,"x"],
               lat = state0()[,"y"], 
               zoom = 6) %>%
-      addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
-      addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
+      addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
+      addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
+    dataset <- subset(dataset,  elat != 0.00 & elon != 0.00)
+    
+    for(i in 1:nrow(dataset)){
+      map <- addPolylines(map, lat = as.numeric(dataset[i, c(16, 18)]), lng = as.numeric(dataset[i, c(17, 19)]), weight=1)
+    }
     map
   })
   
@@ -767,39 +790,44 @@ server <- function(input, output, session){
               lng = state1()[,"x"], 
               lat = state1()[,"y"], 
               zoom = 6) %>%
-      addMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start") %>%
-      addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
+      addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
+      addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
+    
     map
   })
   
-  output$heatmap0 <- renderLeaflet({
+  output$Leaf10Most <- renderLeaflet({
     
-    # Subset by Year And State
-    dataset <- subset(tornadoes, st == input$HeatmapState0)
+    # Select dataset by critera
+    if(input$top10 == "1"){   ## if it is the magnitude
+      dataset <- magnitude_sorted10
+    }
+    else if(input$top10 == "2"){ ## if it is the fatalities
+      dataset <- fatalities_sorted10
+    }
+    else{ ##  if it is injuries
+      dataset <- injuries_sorted10
+    }
     
-    map <- leaflet(dataset) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
+    map <- leaflet(options = leafletOptions(zoomControl= FALSE)) %>% #, dragging = FALSE, minZoom = 6, maxZoom = 6)) %>%
+      addTiles() %>% 
+      
+      # Select leaflet provider tiles from user input
+      addProviderTiles(providers$Stamen.TonerLite) %>%
+      
       setView(map, 
-              lng = heatmapState0()[,"x"], 
-              lat = heatmapState0()[,"y"], 
+              lng = state1()[,"x"], 
+              lat = state1()[,"y"], 
               zoom = 6) %>%
-      addHeatmap(lng = ~slon, lat = ~slat, intensity = ~mag, blur = 20,
-                 max = 0.001, radius = 8)
-    map
-  })
-  
-  output$heatmap1 <- renderLeaflet({
-    # Subset by Year And State
-    dataset <- subset(tornadoes, st == input$HeatmapState1)
+      addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
+      addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
+    dataset <- subset(dataset,  elat != 0.00 & elon != 0.00)
     
-    map <- leaflet(dataset) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
-      setView(map, 
-              lng = heatmapState1()[,"x"], 
-              lat = heatmapState1()[,"y"], 
-              zoom = 6) %>%
-      addHeatmap(lng = ~elon, lat = ~elat, intensity = ~mag, blur = 20,
-                 max = 0.001, radius = 8)
-    map
+    for(i in 1:nrow(dataset)){
+      map <- addPolylines(map, lat = as.numeric(dataset[i, c(16, 18)]), lng = as.numeric(dataset[i, c(17, 19)]), weight=1)
+    }
     
+    map
   })
   
   output$distance_magnitude_percentage <- renderPlot({
@@ -809,19 +837,19 @@ server <- function(input, output, session){
     melted_fymp <- melt(as.matrix(filt_year_mag_per))
     
     ggplot(data=melted_fymp, aes(x=Var1, y=value, color=factor(Var2))) + 
-      geom_line(size=3) + xlab("Year") + ylab("Percentage of Magnitudes")
+      geom_line(size=3) + xlab("Year") + ylab("Percentage of Magnitudes") + scale_color_brewer(palette="Set3")
     
   })
   
   output$countyTable <- renderDataTable({
-    datatable(illinois_counties, 
+    datatable(countyInfo, 
               options = list(searching = FALSE, pageLength = 8, lengthChange = FALSE))
   })
   
   
   output$countyChart <- renderPlot({
     ggplot(data = countyInfo, aes(x=countyInfo$County, y=countyInfo$Frequency))  +
-      geom_bar(position="dodge", stat="identity", fill = "orange") + labs(x="County", y = "# of Tornadoes") + theme(axis.text.x = element_text(angle = 90, vjust=0.5))
+      geom_bar(position="dodge", stat="identity", fill = "orange") + labs(x="County ", y = "# of Tornadoes") + theme(axis.text.x = element_text(angle = 90, vjust=0.5))
     
   })
   
@@ -846,7 +874,7 @@ server <- function(input, output, session){
     options = list(orderClasses = TRUE,
                    pageLength = 10,  dom = 'tp')
   )
-
+  
   output$monthLossTable <- renderDataTable(
     getTornadoLossPerMonthTable(monthlyloss), 
     options = list(orderClasses = TRUE,
@@ -858,7 +886,7 @@ server <- function(input, output, session){
     options = list(orderClasses = TRUE,
                    pageLength = 10,  dom = 'tp')
   )
-
+  
   output$hourLossTable <- renderDataTable(
     getTornadoLossPerHourTable(hourlyloss), 
     options = list(orderClasses = TRUE,
@@ -895,6 +923,7 @@ server <- function(input, output, session){
                               "Loss", "Month", "Tornadoes Per Month", "", "Month")
     
   })
+  
   
   output$hourInjFatPlot <- renderPlotly({
     if(input$hour_damages_radio == 2){
@@ -942,9 +971,10 @@ server <- function(input, output, session){
     }
     else{
       dynamic_bar_graph_stacked(hourlyloss, hourlyloss$hr, hourlyloss$hrloss, hourlyloss$loss,
-                              "Loss", "Hour", "Tornadoes Per Hour", "", "Hour")   
+                                "Loss", "Hour", "Tornadoes Per Hour", "", "Hour")   
     }
   })
+  
   
   
   output$injuryCountyPlot <- renderPlotly({

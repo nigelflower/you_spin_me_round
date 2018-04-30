@@ -363,7 +363,10 @@ ui <- dashboardPage(skin="black",
                                                  icon=icon("calendar")),
                                      menuSubItem("Hour", 
                                                  tabName="HourDamages",
-                                                 icon=icon("hourglass"))
+                                                 icon=icon("hourglass")),
+                                     menuSubItem("County", 
+                                                 tabName="CountyDamages",
+                                                 icon=icon("map"))
                             ),
                             menuItem("Illinois", tabName="Illinois"),
                             menuItem("TestLeaf", tabName = "TestLeaf"),
@@ -495,6 +498,16 @@ ui <- dashboardPage(skin="black",
                                     )
                                     
                             ),
+                            tabItem(tabName="CountyDamages",
+                                    fluidRow(
+                                      box(title="Illinois Injuries Per County",
+                                          plotlyOutput("injuryCountyPlot", height = "1500px"), width=4),
+                                      box(title="Illinois Fatalities Per County",
+                                          plotlyOutput("fatalityCountyPlot", height = "1500px"), width=4),
+                                      box(title="Illinois Loss Per County",
+                                          plotlyOutput("lossCountyPlot", height = "1500px"), width=4)
+                                    )
+                            ),
                             tabItem(tabName="Illinois",
                                     fluidRow(
                                       box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
@@ -512,16 +525,7 @@ ui <- dashboardPage(skin="black",
                                           uiOutput("reset2"),
                                           leafletOutput("Leaf10Most")
                                       )
-                                    ),
-                                    fluidRow(
-                                      box(title="Illinois Injuries Per County",
-                                          plotlyOutput("injuryCountyPlot"), width=4),
-                                      box(title="Illinois Fatalities Per County",
-                                          plotlyOutput("fatalityCountyPlot"), width=4),
-                                      box(title="Illinois Loss Per County",
-                                          plotlyOutput("lossCountyPlot"), width=4)
                                     )
-                                    
                             ),
                             
                             tabItem(tabName="TestLeaf",
