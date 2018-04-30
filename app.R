@@ -574,6 +574,7 @@ ui <- dashboardPage(skin="black",
                                            sliderInput("compWidth", "Filter By Width (yards)", min = 0, max = 4576, c(0, 4576)),
                                            sliderInput("compLength", "Filter By Length (miles)", min = 0, max = 235, value = c(0,235)),
                                            sliderInput("compInj", "Filter By Injuries", min = 0, max = 1740, value = c(0,1740)),
+                                           sliderInput("compFat", "Filter By Fatalities", min = 0, max = 158, value = c(0,158)),
                                            sliderInput("compLoss", "Filter By Losses ($)", min = 0, max = 22000000, value = c(0,22000000), pre = "$", sep = "," )
                                            ,style = "font-size:200%")
                                     )
@@ -699,7 +700,9 @@ server <- function(input, output, session){
     inj_max <- input$compInj[2]
     dataset <- subset(dataset, inj >= inj_min & inj <= inj_max)
     #  fatalities
-    
+    fat_min <- input$compFat[1]
+    fat_max <- input$compFat[2]
+    dataset <- subset(dataset, fat >= fat_min & fat <= fat_max)
     # Subset by Loss
     loss_min <- input$compLoss[1]
     loss_max <- input$compLoss[2]
@@ -829,12 +832,17 @@ server <- function(input, output, session){
       setView(map, 
               lng = state1()[,"x"], 
               lat = state1()[,"y"], 
-              zoom = 7) 
-    for(i in 1:nrow(dataset)){
-      map <- addPolylines(map, lat = as.numeric(dataset[i,c('slat','elat')]),lng = as.numeric(dataset[i,c('slon','elon')]), 
+              zoom = 7)
+      
+    
+      for(i in 1:nrow(dataset)){
+        map <- addPolylines(map, lat = as.numeric(dataset[i,c('slat','elat')]),lng = as.numeric(dataset[i,c('slon','elon')]), 
                           weight = 3*(as.numeric(dataset[i,'mag'])+1)
-      )
-    }
+        )
+      }
+    #map <- addCircleMarkers(map, lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
+     # addCircleMarkers(lng = (dataset[,"slon"] + dataset[,"elon"])/2, lat = (dataset[,"slat"] + dataset[,"elat"])/2, popup = "middle", radius = 5, color = 'black') %>%
+      #addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'blue')
     map
   })
   
