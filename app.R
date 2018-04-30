@@ -545,22 +545,29 @@ ui <- dashboardPage(skin="black",
                                     )
                             ),
                             tabItem(tabName="Illinois",
-                                    fluidRow(
-                                      box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
-                                          dataTableOutput("countyTable"))
+                                    
+                                    column(4,
+                                       fluidRow(
+                                           box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
+                                               dataTableOutput("countyTable", height="90vh"))
+                                       )
                                     ),
                                     
-                                    fluidRow(
-                                      box(title = "Tornado Counties Graph", solidHeader = TRUE, status = "primary", width = 12,
-                                          plotOutput("countyChart"))
+                                    column(4,
+                                       fluidRow(
+                                           box(title = "Tornado Counties Graph", solidHeader = TRUE, status = "primary", width = 12,
+                                               plotOutput("countyChart", height="90vh"))
+                                       )
                                     ),
                                     
-                                    fluidRow(
-                                      box(title = "Illinois 10 Most Powerful/Destructive tornadoes", solidHeader = TRUE, status = "primary", width = 12,
-                                          selectInput("top10", "Choose to view by criteria:", choices = c('Magnitude'='1','Fatality'='2', 'Injury' = '3'), selected = 'Magnitude'),
-                                          uiOutput("reset2"),
-                                          leafletOutput("Leaf10Most")
-                                      )
+                                    column(4,
+                                       fluidRow(
+                                           box(title = "Illinois 10 Most Powerful/Destructive tornadoes", solidHeader = TRUE, status = "primary", width = 12,
+                                               selectInput("top10", "Choose to view by criteria:", choices = c('Magnitude'='1','Fatality'='2', 'Injury' = '3'), selected = 'Magnitude'),
+                                               uiOutput("reset2"),
+                                               leafletOutput("Leaf10Most", height="90vh")
+                                           )
+                                       )
                                     )
                             ),
                             
