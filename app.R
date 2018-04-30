@@ -391,6 +391,7 @@ ui <- dashboardPage(skin="black",
                             
                             tabItem(tabName="Year",
                                     # Render the Datatable
+                                    div(
                                     column(4,
                                            box(title="Datatable", 
                                                dataTableOutput("year_table", height="80vh"), width=12)
@@ -407,10 +408,13 @@ ui <- dashboardPage(skin="black",
                                            box(title="Percentage of Magnitudes by Year",
                                                plotOutput("year_magnitude_percentage", height="80vh"), width=12)
                                     )
+                                    ,style = "font-size:300%"
+                                )
                             ),
                             
                             tabItem(tabName="Month",
                                     # Render data table
+                                    div(
                                     column(4,
                                            box(title="Datatable",
                                                dataTableOutput("month_table", height="80vh"), width=12)
@@ -428,9 +432,12 @@ ui <- dashboardPage(skin="black",
                                            box(title="Percentage of Magnitudes by Month",
                                                plotOutput("month_magnitude_percentage", height="80vh"), width=12)
                                     )
+                                    ,style = "font-size:300%"
+                                    )
                             ),
                             
                             tabItem(tabName="Hour",
+                                    div(
                                     fluidRow(
                                         radioButtons("hour_radio", h4("Time Selection"),
                                                      choices=list("24 Hours" = 1, "AM/PM" = 2),
@@ -451,9 +458,12 @@ ui <- dashboardPage(skin="black",
                                            box(title="Percentage of Magnitudes by Hour",
                                                plotOutput("hour_magnitude_percentage", height="80vh"), width=12)
                                     )
+                                    ,style = "font-size:300%"
+                                    )
                             ),
                             
                             tabItem(tabName="Distance",
+                                    div(
                                     fluidRow(
                                         box(title = "Distance of Tornado in Miles",
                                             sliderInput("slider", "Number of observations:", 0, 234, c(0, 100))
@@ -476,8 +486,11 @@ ui <- dashboardPage(skin="black",
                                                plotOutput("distance_magnitude_percentage", height="80vh"), width=12)
                                            
                                     )
+                                    ,style = "font-size:300%"
+                                    )
                             ),
                             tabItem(tabName="YearDamages",
+                                    div(
                                     fluidRow(
                                       box(title = "Tornado Injuries Per Year in Illinois", solidHeader = TRUE, status = "primary", width = 6,
                                           dataTableOutput("yearInjFatTable")),
@@ -493,9 +506,12 @@ ui <- dashboardPage(skin="black",
                                       box(title="Tornado Monetary Loss Range Per Year",
                                           plotlyOutput("yearLossPlot", height = "700px"), width=12)
                                     )
+                                    ,style = "font-size:300%"
+                                    )
                                     
                             ),
                             tabItem(tabName="MonthDamages",
+                                    div(
                                     fluidRow(
                                       box(title = "Tornado Injuries Per Month in Illinois", solidHeader = TRUE, status = "primary", width = 6,
                                           dataTableOutput("monthInjFatTable")),
@@ -511,9 +527,12 @@ ui <- dashboardPage(skin="black",
                                       box(title="Tornado Monetary Loss Range Per Month",
                                           plotlyOutput("monthLossPlot", height = "700px"), width=12)
                                     )
+                                    ,style = "font-size:300%"
+                                    )
                                     
                             ),
                             tabItem(tabName="HourDamages",
+                                    div(
                                     fluidRow(
                                       radioButtons("hour_damages_radio", h4("Time Selection"),
                                                    choices=list("24 Hours" = 1, "AM/PM" = 2),
@@ -532,9 +551,12 @@ ui <- dashboardPage(skin="black",
                                       box(title="Tornado Monetary Loss Range Per Hour",
                                           plotlyOutput("hourLossPlot", height = "700px"), width=12)
                                     )
+                                    ,style = "font-size:300%"
+                                    )
                                     
                             ),
                             tabItem(tabName="CountyDamages",
+                                    div(
                                     fluidRow(
                                       box(title="Illinois Injuries Per County",
                                           plotlyOutput("injuryCountyPlot", height = "90vh"), width=4),
@@ -543,9 +565,11 @@ ui <- dashboardPage(skin="black",
                                       box(title="Illinois Loss Per County",
                                           plotlyOutput("lossCountyPlot", height = "90vh"), width=4)
                                     )
+                                    ,style = "font-size:300%"
+                                    )
                             ),
                             tabItem(tabName="Illinois",
-                                    
+                                    div(
                                     column(4,
                                        fluidRow(
                                            box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
@@ -568,6 +592,8 @@ ui <- dashboardPage(skin="black",
                                                leafletOutput("Leaf10Most", height="90vh")
                                            )
                                        )
+                                    )
+                                    ,style = "font-size:300%"
                                     )
                             ),
                             
@@ -627,6 +653,7 @@ ui <- dashboardPage(skin="black",
                             ),
                             
                             tabItem(tabName="Heatmap",
+                                    div(
                                     h2("Heatmap Plots for Illinois Tornadoes"),
                                     
                                     fluidRow(
@@ -638,6 +665,8 @@ ui <- dashboardPage(skin="black",
                                             selectInput(inputId="HeatmapState1", label="Select State", choices=state.abb, selected="IL"),
                                             leafletOutput("heatmap1", height = "90vh"), width=6)
                                     )
+                            )
+                            ,style = "font-size:300%"
                             )
                         )
                     )
