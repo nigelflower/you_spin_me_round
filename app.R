@@ -393,19 +393,19 @@ ui <- dashboardPage(skin="black",
                                     # Render the Datatable
                                     column(4,
                                            box(title="Datatable", 
-                                               dataTableOutput("year_table", height="1000px"), width=12)
+                                               dataTableOutput("year_table", height="100vh"), width=12)
                                     ),
                                     
                                     # Render the magnitudes by year
                                     column(4,
                                            box(title="Tornado Magnitudes by Year",
-                                               plotOutput("year_magnitude", height="1000px"), width=12)
+                                               plotOutput("year_magnitude", height="100vh"), width=12)
                                     ),
                                     
                                     # Render the percentages of magnitudes by year
                                     column(4,
                                            box(title="Percentage of Magnitudes by Year",
-                                               plotOutput("year_magnitude_percentage", height="1000px"), width=12)
+                                               plotOutput("year_magnitude_percentage", height="100vh"), width=12)
                                            
                                     )
                             ),
@@ -649,6 +649,11 @@ states[state.abb == "HI",][4] <- 19.8968
 
 server <- function(input, output, session){
   
+    output$year_table <- renderDataTable({
+        data.frame(table(tornadoes$yr, tornadoes$mag))
+    })
+    
+    
   output$year_magnitude <- renderPlot({
     year_mag <- data.frame(table(tornadoes$yr, tornadoes$mag))
     
@@ -667,6 +672,11 @@ server <- function(input, output, session){
       xlab("Year") + ylab("Percentage of Magnitudes") + scale_color_brewer(palette="Set3")
     
   })
+  
+  output$month_table <- renderDataTable(
+      data.frame(table(tornadoes$mo, tornadoes$mag))
+  )
+  
   
   output$month_magnitude <- renderPlot({
     mo_mag <- data.frame(table(tornadoes$mo, tornadoes$mag))
@@ -688,6 +698,12 @@ server <- function(input, output, session){
     
   })
   
+  
+  output$hour_table <- renderDataTable(
+      hour_mag <- data.frame(table(hours, tornadoes$mag))
+  )
+  
+  
   output$hour_magnitude <- renderPlot({
     # hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
     hour_mag <- data.frame(table(hours, tornadoes$mag))
@@ -708,6 +724,12 @@ server <- function(input, output, session){
       xlab("Hours") + ylab("Percentage of Magnitudes") +
       guides(fill=guide_legend(title="Magnitude")) + scale_color_brewer(palette="Set3")
   })
+  
+  
+  output$distance_table <- renderDataTable(
+      subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])
+  )
+  
   
   output$distance_magnitude <- renderPlot({
     filtered_tornadoes <- subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])
