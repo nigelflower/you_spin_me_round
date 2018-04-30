@@ -1,4 +1,5 @@
 library(leaflet)
+library(leaflet.extras)
 library(ggplot2)
 library(lubridate)
 library(shiny)
