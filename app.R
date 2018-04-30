@@ -647,7 +647,7 @@ ui <- dashboardPage(skin="black",
                                            sliderInput("compLength", "Filter By Length (miles)", min = 0, max = 235, value = c(0,235)),
                                            sliderInput("compInj", "Filter By Injuries", min = 0, max = 1740, value = c(0,1740)),
                                            sliderInput("compFat", "Filter By Fatalities", min = 0, max = 158, value = c(0,158)),
-                                           sliderInput("compLoss", "Filter By Losses ($)", min = 0, max = 22000000, value = c(0,22000000), pre = "$", sep = "," )
+                                           sliderInput("compLoss", "Filter By Losses ($)", min = 0, max = 7, value = c(0,7), pre = "$", sep = "," )
                                            ,style = "font-size:200%")
                                     )
                             ),
@@ -673,7 +673,26 @@ ui <- dashboardPage(skin="black",
 )
 
 # Ryan's variables pre-server
-
+#homogenize loss
+tornadoesComp <- tornadoes
+tornadoesComp$loss <- ifelse(tornadoesComp$yr >= 2016, 
+                             (ifelse(tornadoesComp$loss >  0 & tornadoesComp$loss < 5000,1,
+                                     (ifelse(tornadoesComp$loss >= 5000 & tornadoesComp$loss < 50000,2,
+                                             (ifelse(tornadoesComp$loss >= 50000 & tornadoesComp$loss < 500000,3,
+                                                     (ifelse(tornadoesComp$loss >= 500000 & tornadoesComp$loss < 5000000,4,
+                                                             (ifelse(tornadoesComp$loss >= 5000000 & tornadoesComp$loss < 50000000,5,
+                                                                     (ifelse(tornadoesComp$loss >= 50000000 & tornadoesComp$loss < 50000000,6,
+                                                                             (ifelse(tornadoesComp$loss >= 50000000,7 , 0)))))))))))))), 
+                             ifelse(tornadoesComp$yr >= 1996, 
+                                    (ifelse(tornadoesComp$loss >  0 & tornadoesComp$loss < 0.005, 1,
+                                            (ifelse(tornadoesComp$loss >= 0.005 & tornadoesComp$loss < 0.05,2,
+                                                    (ifelse(tornadoesComp$loss >= 0.05 & tornadoesComp$loss < 0.5,3,
+                                                            (ifelse(tornadoesComp$loss >= 0.5 & tornadoesComp$loss < 5,4,
+                                                                    (ifelse(tornadoesComp$loss >= 5 & tornadoesComp$loss < 50,5,
+                                                                            (ifelse(tornadoesComp$loss >= 50 & tornadoesComp$loss < 500,6,
+                                                                                    (ifelse(tornadoesComp$loss >= 500,7 , 0)))))))))))))), 
+                                    (ifelse(tornadoesComp$loss <= 3, 
+                                            (ifelse(tornadoesComp$loss > 0, 1, 0)), tornadoesComp$loss - 2))))
 # Read in lat/lon of each state's center
 states <- data.frame(state.name,state.abb,state.center[1],state.center[2])
 # Fix Alaska and Hawaii
@@ -781,7 +800,7 @@ server <- function(input, output, session){
   reactiveData0 <- reactive({
     # Things to constrain by:
     # Subset by State
-    dataset <- subset(tornadoes, st == input$SelectState0)
+    dataset <- subset(tornadoesComp, st == input$SelectState0)
     # Subset by Year
     dataset <- subset(dataset, yr == input$compYear)
     # Subset by Month
@@ -820,7 +839,7 @@ server <- function(input, output, session){
   reactiveData1 <- reactive({
     # Things to constrain by:
     # Subset by State
-    dataset <- subset(tornadoes, st == input$SelectState1)
+    dataset <- subset(tornadoesComp, st == input$SelectState1)
     # Subset by Year
     dataset <- subset(dataset, yr == input$compYear)
     # Subset by Month
