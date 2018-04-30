@@ -1,0 +1,12 @@
+name: you_spin_me_round
+title: you_spin_me_round
+username:
+account: kerfuffle
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 333929
+bundleId: 1346575
+url: https://kerfuffle.shinyapps.io/you_spin_me_round/
+when: 1525059152.66493
+asMultiple: FALSE
+asStatic: FALSE
