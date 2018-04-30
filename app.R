@@ -538,11 +538,11 @@ ui <- dashboardPage(skin="black",
                             tabItem(tabName="CountyDamages",
                                     fluidRow(
                                       box(title="Illinois Injuries Per County",
-                                          plotlyOutput("injuryCountyPlot", height = "1500px"), width=4),
+                                          plotlyOutput("injuryCountyPlot", height = "90vh"), width=4),
                                       box(title="Illinois Fatalities Per County",
-                                          plotlyOutput("fatalityCountyPlot", height = "1500px"), width=4),
+                                          plotlyOutput("fatalityCountyPlot", height = "90vh"), width=4),
                                       box(title="Illinois Loss Per County",
-                                          plotlyOutput("lossCountyPlot", height = "1500px"), width=4)
+                                          plotlyOutput("lossCountyPlot", height = "90vh"), width=4)
                                     )
                             ),
                             tabItem(tabName="Illinois",
