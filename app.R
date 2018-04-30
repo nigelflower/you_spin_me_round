@@ -644,7 +644,25 @@ ui <- dashboardPage(skin="black",
                     )
 
 # Ryan's variables pre-server
-
+tornadoesComp <- tornadoes
+tornadoesComp$loss <- ifelse(tornadoesComp$yr >= 2016, 
+                           (ifelse(tornadoesComp$loss >  0 & tornadoesComp$loss < 5000,1,
+                                   (ifelse(tornadoesComp$loss >= 5000 & tornadoesComp$loss < 50000,2,
+                                           (ifelse(tornadoesComp$loss >= 50000 & tornadoesComp$loss < 500000,3,
+                                                   (ifelse(tornadoesComp$loss >= 500000 & tornadoesComp$loss < 5000000,4,
+                                                           (ifelse(tornadoesComp$loss >= 5000000 & tornadoesComp$loss < 50000000,5,
+                                                                   (ifelse(tornadoesComp$loss >= 50000000 & tornadoesComp$loss < 50000000,6,
+                                                                           (ifelse(tornadoesComp$loss >= 50000000,7 , 0)))))))))))))), 
+                           ifelse(tornadoesComp$yr >= 1996, 
+                                  (ifelse(tornadoesComp$loss >  0 & tornadoesComp$loss < 0.005, 1,
+                                          (ifelse(tornadoesComp$loss >= 0.005 & tornadoesComp$loss < 0.05,2,
+                                                  (ifelse(tornadoesComp$loss >= 0.05 & tornadoesComp$loss < 0.5,3,
+                                                          (ifelse(tornadoesComp$loss >= 0.5 & tornadoesComp$loss < 5,4,
+                                                                  (ifelse(tornadoesComp$loss >= 5 & tornadoesComp$loss < 50,5,
+                                                                          (ifelse(tornadoesComp$loss >= 50 & tornadoesComp$loss < 500,6,
+                                                                                  (ifelse(tornadoesComp$loss >= 500,7 , 0)))))))))))))), 
+                                  (ifelse(tornadoesComp$loss <= 3, 
+                                          (ifelse(tornadoesComp$loss > 0, 1, 0)), tornadoesComp$loss - 2))))
 # Read in lat/lon of each state's center
 states <- data.frame(state.name,state.abb,state.center[1],state.center[2])
 # Fix Alaska and Hawaii
