@@ -626,11 +626,11 @@ ui <- dashboardPage(skin="black",
                                     fluidRow(
                                         box(title="Heatmap of Illinois Tornadoes Starting Point",
                                             selectInput(inputId="HeatmapState0", label="Select State", choices=state.abb, selected="IL"),
-                                            leafletOutput("heatmap0", height = "1500px"), width=6),
+                                            leafletOutput("heatmap0", height = "90vh"), width=6),
                                         
                                         box(title="Heatmap of Illinois Tornadoes Ending Point",
                                             selectInput(inputId="HeatmapState1", label="Select State", choices=state.abb, selected="IL"),
-                                            leafletOutput("heatmap1", height = "1500px"), width=6)
+                                            leafletOutput("heatmap1", height = "90vh"), width=6)
                                     )
                             )
                         )
@@ -1118,9 +1118,9 @@ server <- function(input, output, session){
           setView(map, 
                   lng = heatmapState0()[,"x"], 
                   lat = heatmapState0()[,"y"], 
-                  zoom = 6) %>%
+                  zoom = 8) %>%
           addHeatmap(lng = ~slon, lat = ~slat, intensity = ~mag, blur = 20,
-                     max = 0.001, radius = 8)
+                     max = 0.001, radius = 10)
       map
   })
   
@@ -1132,9 +1132,9 @@ server <- function(input, output, session){
           setView(map, 
                   lng = heatmapState1()[,"x"], 
                   lat = heatmapState1()[,"y"], 
-                  zoom = 6) %>%
+                  zoom = 8) %>%
           addHeatmap(lng = ~elon, lat = ~elat, intensity = ~mag, blur = 20,
-                     max = 0.001, radius = 8)
+                     max = 0.001, radius = 10)
       map
       
   })
