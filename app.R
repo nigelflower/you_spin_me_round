@@ -1027,7 +1027,7 @@ server <- function(input, output, session){
       setView(map, 
               lng = state1()[,"x"], 
               lat = state1()[,"y"], 
-              zoom = 6) %>%
+              zoom = 9) %>%
       addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
       addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 5, color = 'red')
     dataset <- subset(dataset,  elat != 0.00 & elon != 0.00)
