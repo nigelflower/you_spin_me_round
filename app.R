@@ -743,10 +743,51 @@ server <- function(input, output, session){
   
   
   # Ryan Leaflet Server Code
-  reactiveData <- reactive({
+  reactiveData0 <- reactive({
     # Things to constrain by:
+    # Subset by State
+    dataset <- subset(tornadoes, st == input$SelectState0)
     # Subset by Year
-    dataset <- subset(tornadoes, yr == input$compYear)
+    dataset <- subset(dataset, yr == input$compYear)
+    # Subset by Month
+    dataset <- subset(dataset, mo >= input$compMonth[1] & mo <= input$compMonth[2])
+    # Subset by Width
+    wid_min <- input$compWidth[1]
+    wid_max <- input$compWidth[2]
+    dataset <- subset(dataset, wid >= wid_min & wid <= wid_max)
+    # Subset by Length
+    len_min <- input$compLength[1]
+    len_max <- input$compLength[2]
+    dataset <- subset(dataset, len >= len_min & len <= len_max)
+    # Subset by Injuries
+    inj_min <- input$compInj[1]
+    inj_max <- input$compInj[2]
+    dataset <- subset(dataset, inj >= inj_min & inj <= inj_max)
+    #  fatalities
+    fat_min <- input$compFat[1]
+    fat_max <- input$compFat[2]
+    dataset <- subset(dataset, fat >= fat_min & fat <= fat_max)
+    # Subset by Loss
+    loss_min <- input$compLoss[1]
+    loss_max <- input$compLoss[2]
+    dataset <- subset(dataset, loss >= loss_min & loss <= loss_max)
+    
+    # Subset by Magnitude
+    mag_filter <- input$magnitudeFilter
+    
+    if(!is.null(mag_filter)){
+      dataset <- subset(dataset, mag %in% mag_filter)
+      print(strtoi(input$magnitudeFilter))
+    }
+    
+    dataset
+  })
+  reactiveData1 <- reactive({
+    # Things to constrain by:
+    # Subset by State
+    dataset <- subset(tornadoes, st == input$SelectState1)
+    # Subset by Year
+    dataset <- subset(dataset, yr == input$compYear)
     # Subset by Month
     dataset <- subset(dataset, mo >= input$compMonth[1] & mo <= input$compMonth[2])
     # Subset by Width
@@ -792,23 +833,21 @@ server <- function(input, output, session){
   # Plot output
   
   output$stateTable0 <- renderDataTable({
-    dataset <- reactiveData()
-    dataset <- subset(dataset, st == input$SelectState0)
+    dataset <- reactiveData0()
     as.data.frame(dataset[,c(5,6,11,12,13,14,20,21)])
   },options = list(searching = FALSE,lengthChange = FALSE)
   )
   
   output$stateTable1 <- renderDataTable({
-    dataset <- reactiveData()
-    dataset <- subset(dataset, st == input$SelectState1)
+    dataset <- reactiveData1()
     as.data.frame(dataset[,c(5,6,11,12,13,14,20,21)])
   },options = list(searching = FALSE,lengthChange = FALSE)
   )
   
   output$stateChart0 <- renderPlotly({
-    dataset <- reactiveData()
-    as.data.frame(dataset[,c(11,12,13,14)]) %>%
-    plot_ly(width = "100%", height = 900) %>%
+    dataset <- reactiveData0()
+    as.data.frame(dataset[,c(11,12,13,14,20,21)]) %>%
+    plot_ly(height = 900) %>%
       add_trace(type = 'parcoords',
                 line = list(color = "blue",
                             colorscale = 'Jet',
@@ -819,6 +858,10 @@ server <- function(input, output, session){
                 dimensions = list(
                   list(range = c(~min(mag),~max(mag)),
                        label = 'Magnitude', values = ~mag),
+                  list(range = c(~min(wid),~max(wid)),
+                       label = 'Width', values = ~wid),
+                  list(range = c(~min(len),~max(len)),
+                       label = 'Length', values = ~len),
                   list(range = c(~min(inj),~max(inj)),
                        label = 'Injuries', values = ~inj),
                   list(range = c(~min(fat),~max(fat)),
@@ -829,13 +872,36 @@ server <- function(input, output, session){
       )
   })
   output$stateChart1 <- renderPlotly({
-    
+    dataset <- reactiveData1()
+    as.data.frame(dataset[,c(11,12,13,14,20,21)]) %>%
+      plot_ly(height = 900) %>%
+      add_trace(type = 'parcoords',
+                line = list(color = "blue",
+                            colorscale = 'Jet',
+                            showscale = TRUE,
+                            reversescale = TRUE,
+                            cmin = -4000,
+                            cmax = -100),
+                dimensions = list(
+                  list(range = c(~min(mag),~max(mag)),
+                       label = 'Magnitude', values = ~mag),
+                  list(range = c(~min(wid),~max(wid)),
+                       label = 'Width', values = ~wid),
+                  list(range = c(~min(len),~max(len)),
+                       label = 'Length', values = ~len),
+                  list(range = c(~min(inj),~max(inj)),
+                       label = 'Injuries', values = ~inj),
+                  list(range = c(~min(fat),~max(fat)),
+                       label = 'Fatalities', values = ~fat),
+                  list(range = c(~min(loss),~max(loss)),
+                       label = 'Loss', values = ~loss)
+                )
+      )
   })
   
   output$Leaf0 <- renderLeaflet({
     # Subset by Year And State
-    dataset <- reactiveData()
-    dataset <- subset(dataset, st == input$SelectState0)
+    dataset <- reactiveData0()
     
     # Remove zero data
     dataset <- subset(dataset, slat != 0 & slon != 0 & elat != 0 & elon != 0 )
@@ -884,8 +950,7 @@ server <- function(input, output, session){
   })
   
   output$Leaf1 <- renderLeaflet({
-    dataset <- reactiveData()
-    dataset <- subset(dataset, st == input$SelectState1)
+    dataset <- reactiveData1()
     # Remove zero data
     dataset <- subset(dataset, slat != 0 & slon != 0 & elat != 0 & elon != 0 )
     
