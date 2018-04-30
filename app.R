@@ -1,4 +1,5 @@
 library(leaflet)
+library(leaflet.extras)
 library(ggplot2)
 library(lubridate)
 library(shiny)
@@ -558,7 +559,7 @@ ui <- dashboardPage(skin="black",
                                     ),
                                     column(2,
                                            div(
-                                           sliderInput(inputId = "compYear", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = ""),
+                                           sliderInput(inputId = "compYear", label = "Year", min = 1950, max = 2016, value = 1950, step = 1, animate = TRUE, sep = ""),
                                            sliderInput(inputId = 'compMonth', label = "Month(s)", min = 1, max = 12, value = c(1,12), step = 1, animate = TRUE, sep = ""),
                                            selectInput(inputId = "MapSelect", label="Select Map Type", choices = provider_tiles, selected="Stamen Toner"),
                                            checkboxGroupInput("magnitudeFilter",
