@@ -688,6 +688,16 @@ server <- function(input, output, session){
     dataset <- subset(dataset, inj >= inj_min & inj <= inj_max)
     #  fatalities
     
+    # Reactive code for the heatmaps
+    heatmapState0 <- reactive({
+        states[state.abb == input$HeatmapState0,]
+    })
+    
+    heatmapState1 <- reactive({
+        states[state.abb == input$HeatmapState1,]
+    })
+    
+    
     # Subset by Loss
     loss_min <- input$compLoss[1]
     loss_max <- input$compLoss[2]
@@ -1000,6 +1010,45 @@ server <- function(input, output, session){
   output$lossCountyPlot <- renderPlotly({
     ggplotly(countyLossMap)
   })
+  
+  heatmapState0 <- reactive({
+      states[state.abb == input$HeatmapState0,]
+  })
+  
+  heatmapState1 <- reactive({
+      states[state.abb == input$HeatmapState1,]
+  })
+  
+  output$heatmap0 <- renderLeaflet({
+      
+      # Subset by Year And State
+      dataset <- subset(tornadoes, st == input$HeatmapState0)
+      
+      map <- leaflet(dataset) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
+          setView(map, 
+                  lng = heatmapState0()[,"x"], 
+                  lat = heatmapState0()[,"y"], 
+                  zoom = 6) %>%
+          addHeatmap(lng = ~slon, lat = ~slat, intensity = ~mag, blur = 20,
+                     max = 0.001, radius = 8)
+      map
+  })
+  
+  output$heatmap1 <- renderLeaflet({
+      # Subset by Year And State
+      dataset <- subset(tornadoes, st == input$HeatmapState1)
+      
+      map <- leaflet(dataset) %>% addProviderTiles(providers$CartoDB.DarkMatter) %>%
+          setView(map, 
+                  lng = heatmapState1()[,"x"], 
+                  lat = heatmapState1()[,"y"], 
+                  zoom = 6) %>%
+          addHeatmap(lng = ~elon, lat = ~elat, intensity = ~mag, blur = 20,
+                     max = 0.001, radius = 8)
+      map
+      
+  })
+  
 }
 
 shinyApp(ui, server)
