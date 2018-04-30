@@ -526,12 +526,20 @@ ui <- dashboardPage(skin="black",
                             
                             tabItem(tabName="CompareStates",
                                     column(3,
-                                           box(width = 12),
-                                           box(width = 12)
+                                           box(width = 12,
+                                               dataTableOutput("stateTable0")
+                                               ),
+                                           box(width = 12,
+                                               dataTableOutput("stateTable1")
+                                               )
                                     ),
                                     column(4,
-                                           box(width = 12),
-                                           box(width = 12)
+                                           box(width = 12,
+                                               dataTableOutput("stateChart0")
+                                           ),
+                                           box(width = 12,
+                                               dataTableOutput("stateChart1")
+                                           )
                                     ),
                                     column(3,
                                            box(width = 12, height = 1000,
@@ -559,10 +567,10 @@ ui <- dashboardPage(skin="black",
                                                                              "3" = 3, 
                                                                              "4" = 4,
                                                                              "5" = 5),inline = TRUE),
-                                           sliderInput("compWidth", "Filter By Width", min = 0, max = 4576, c(0, 4576)),
-                                           sliderInput("compLength", "Filter By Length", min = 0, max = 234, value = c(0,234)),
+                                           sliderInput("compWidth", "Filter By Width (yards)", min = 0, max = 4576, c(0, 4576)),
+                                           sliderInput("compLength", "Filter By Length (miles)", min = 0, max = 235, value = c(0,235)),
                                            sliderInput("compInj", "Filter By Injuries", min = 0, max = 1740, value = c(0,1740)),
-                                           sliderInput("compLoss", "Filter By Losses", min = 0, max = 22000000, value = c(0,22000000), pre = "$", sep = "," )
+                                           sliderInput("compLoss", "Filter By Losses ($)", min = 0, max = 22000000, value = c(0,22000000), pre = "$", sep = "," )
                                            
                                     )
                             ),
@@ -713,6 +721,24 @@ server <- function(input, output, session){
   
   
   # Plot output
+  
+  output$stateTable0 <- renderDataTable({
+    dataset <- reactiveData()
+    dataset <- subset(dataset, st == input$SelectState0)
+    dataset <- subset(dataset)
+    as.data.frame(dataset[,c(5,6,11,12,13,14,20,21)])
+    
+              
+  },options = list(searching = FALSE,lengthChaneg = FALSE))
+  
+  output$stateTable1 <- renderDataTable({
+    dataset <- reactiveData()
+    dataset <- subset(dataset, st == input$SelectState1)
+    dataset <- subset(dataset)
+    as.data.frame(dataset[,c(5,6,11,12,13,14,20,21)])
+  })
+  
+  
   output$Leaf0 <- renderLeaflet({
     # Subset by Year And State
     dataset <- reactiveData()
