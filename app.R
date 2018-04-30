@@ -390,26 +390,44 @@ ui <- dashboardPage(skin="black",
                             ),
                             
                             tabItem(tabName="Year",
-                                    fluidRow(
-                                        box(title="Tornado Magnitudes by Year",
-                                            plotOutput("year_magnitude"), width=12)
+                                    # Render the Datatable
+                                    column(4,
+                                           box(title="Datatable", 
+                                               dataTableOutput("year_table"), width=12, height="1000px")
                                     ),
                                     
-                                    fluidRow(
-                                        box(title="Percentage of Magnitudes by Year",
-                                            plotOutput("year_magnitude_percentage"), width=12)
+                                    # Render the magnitudes by year
+                                    column(4,
+                                           box(title="Tornado Magnitudes by Year",
+                                               plotOutput("year_magnitude"), width=12, height="1000px")
+                                    ),
+                                    
+                                    # Render the percentages of magnitudes by year
+                                    column(4,
+                                           box(title="Percentage of Magnitudes by Year",
+                                               plotOutput("year_magnitude_percentage"), width=12, height="1000px")
+                                           
                                     )
                             ),
                             
                             tabItem(tabName="Month",
-                                    fluidRow(
-                                        box(title="Tornado Magnitudes by Month",
-                                            plotOutput("month_magnitude"), width=12)
+                                    # Render data table
+                                    column(4,
+                                           box(title="Datatable",
+                                               dataTableOutput("month_table"), width=12, height="1000px")
                                     ),
                                     
-                                    fluidRow(
-                                        box(title="Percentage of Magnitudes by Month",
-                                            plotOutput("month_magnitude_percentage"), width=12)
+                                    # Render magnitudes by month
+                                    column(4,
+                                           box(title="Tornado Magnitudes by Month",
+                                               plotOutput("month_magnitude"), width=12, height="1000px")
+                                           
+                                    ),
+                                    
+                                    # Render percentages of magnitudes by month
+                                    column(4,
+                                           box(title="Percentage of Magnitudes by Month",
+                                               plotOutput("month_magnitude_percentage"), width=12, height="1000px")
                                     )
                             ),
                             
@@ -417,33 +435,47 @@ ui <- dashboardPage(skin="black",
                                     fluidRow(
                                         radioButtons("hour_radio", h4("Time Selection"),
                                                      choices=list("24 Hours" = 1, "AM/PM" = 2),
-                                                     selected=1),
-                                        
-                                        box(title="Tornado Magnitudes by Hour",
-                                            plotOutput("hour_magnitude"), width=12)
+                                                     selected=1)
                                     ),
                                     
-                                    fluidRow(
-                                        box(title="Percentage of Magnitudes by Hour",
-                                            plotOutput("hour_magnitude_percentage"), width=12)
+                                    column(4,
+                                           box(title="Datatable",
+                                               dataTableOutput("hour_table"), width=12, height="800px")
+                                    ),
+                                    
+                                    column(4,
+                                           box(title="Tornado Magnitudes by Hour",
+                                               plotOutput("hour_magnitude"), width=12, height="800px")
+                                    ),
+                                    
+                                    column(4,
+                                           box(title="Percentage of Magnitudes by Hour",
+                                               plotOutput("hour_magnitude_percentage"), width=12, height="800px")
                                     )
                             ),
                             
                             tabItem(tabName="Distance",
                                     fluidRow(
-                                        box(title="Tornado Magnitude by Distance",
-                                            plotOutput("distance_magnitude"), width=12)
-                                    ),
-                                    
-                                    fluidRow(
-                                        box(title="Percentage of Magnitudes by Distance",
-                                            plotOutput("distance_magnitude_percentage"), width=12)
-                                    ),
-                                    
-                                    fluidRow(
                                         box(title = "Distance of Tornado in Miles",
                                             sliderInput("slider", "Number of observations:", 0, 234, c(0, 100))
                                         )
+                                    ),
+                                    
+                                    column(4,
+                                           box(title="Datatable", 
+                                               dataTableOutput("distance_table"), width=12, height="800px")       
+                                    ),
+                                    
+                                    column(4,
+                                           box(title="Percentage of Magnitudes by Distance",
+                                               plotOutput("distance_magnitude"), width=12, height="800px")
+                                           
+                                    ),
+                                    
+                                    column(4,
+                                           box(title="Percentage of Magnitudes by Distance",
+                                               plotOutput("distance_magnitude_percentage"), width=12, height="800px")
+                                           
                                     )
                             ),
                             tabItem(tabName="YearDamages",
