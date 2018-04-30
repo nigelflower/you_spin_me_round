@@ -688,16 +688,6 @@ server <- function(input, output, session){
     dataset <- subset(dataset, inj >= inj_min & inj <= inj_max)
     #  fatalities
     
-    # Reactive code for the heatmaps
-    heatmapState0 <- reactive({
-        states[state.abb == input$HeatmapState0,]
-    })
-    
-    heatmapState1 <- reactive({
-        states[state.abb == input$HeatmapState1,]
-    })
-    
-    
     # Subset by Loss
     loss_min <- input$compLoss[1]
     loss_max <- input$compLoss[2]
