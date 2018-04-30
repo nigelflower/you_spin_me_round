@@ -275,7 +275,7 @@ dynamic_bar_graph_stacked <- function(data, x_axis, y_axis,group, label,
   plot_ly(data, x = x_axis, y = y_axis, type = 'bar', name = label, color= group, name = group,colors = 'Reds',
           legendgroup = ~group,
           hoverinfo = 'text',
-          text = ~paste('Year: ', x_axis,
+          text = ~paste(x_axis,
                         '<br> Number of Tornadoes: ', y_axis,
                         '<br> Loss Category: ', group)) %>%
     layout(xaxis = list(title = x_axis_label, dtick=1, tickangle=45),
@@ -473,6 +473,9 @@ ui <- dashboardPage(skin="black",
                         ),
                         tabItem(tabName="HourDamages",
                                 fluidRow(
+                                  radioButtons("hour_damages_radio", h4("Time Selection"),
+                                               choices=list("24 Hours" = 1, "AM/PM" = 2),
+                                               selected=2),
                                   box(title = "Tornado Injuries Per Hour in Illinois", solidHeader = TRUE, status = "primary", width = 6,
                                       dataTableOutput("hourInjFatTable")),
                                   box(title = "Tornado Loss Per Hour in Illinois", solidHeader = TRUE, status = "primary", width = 6,
@@ -894,17 +897,53 @@ server <- function(input, output, session){
   })
   
   output$hourInjFatPlot <- renderPlotly({
-    tornadoData <- aggregate(tornadoesIL[,12:13],by=list(tornadoesIL$hr), FUN=sum)
-    names(tornadoData )[1]<-"hour"
-    dynamic_bar_graph_grouped(tornadoData, tornadoData$hour, 
-                              tornadoData$inj, "Injuries", 
-                              tornadoData$fat, "Fatalities", 
-                              "Hour of Day", "Total Damages", "", "Type of Damage")
+    if(input$hour_damages_radio == 2){
+      tornadoesIL$hr <- format(strptime(tornadoesIL$hr, "%H"),"%I %p" )
+      tornadoData <- aggregate(tornadoesIL[,12:13],by=list(tornadoesIL$hr), FUN=sum)
+      names(tornadoData )[1]<-"hour"
+      plot_ly(tornadoData, x =~hour, y = ~inj, type = 'bar', name = "Injuries", marker = list(color = redColorLight),
+              hoverinfo='text', text = ~paste('Total Injuries: ', tornadoData$inj,
+                                              '<br> Total Fatalities', tornadoData$fat)) %>%
+        add_trace(tornadoData, ~hour, y = ~fat,  name = "Fatalities", marker = list(color = redColorDark)) %>%
+        layout(xaxis = list(title = "Hour of Day", dtick=1, tickangle=45, categoryorder = "array",
+                            categoryarray = c("01 AM", "02 AM", "03 AM", "04 AM", "05 AM", "06 AM","07 AM", "08 AM", "09 AM", "10 AM", "11 AM", "12 PM", 
+                                              "01 PM", "02 PM", "03 PM", "04 PM", "05 PM", "06 PM","07 PM", "08 PM", "09 PM", "10 PM", "11 PM", "12 AM")),
+               yaxis = list(title = "Total Damages"),
+               title = "",
+               margin = list(b = 100),
+               barmode = 'group')
+    }
+    else{
+      tornadoData <- aggregate(tornadoesIL[,12:13],by=list(tornadoesIL$hr), FUN=sum)
+      names(tornadoData )[1]<-"hour"
+      dynamic_bar_graph_grouped(tornadoData, tornadoData$hour, 
+                                tornadoData$inj, "Injuries", 
+                                tornadoData$fat, "Fatalities", 
+                                "Hour of Day", "Total Damages", "", "Type of Damage")
+    }
   })
   
   output$hourLossPlot <- renderPlotly({
-    dynamic_bar_graph_stacked(hourlyloss, hourlyloss$hr, hourlyloss$hrloss, hourlyloss$loss,
+    if(input$hour_damages_radio == 2){
+      hourlyloss$hr <- format(strptime(hourlyloss$hr, "%H"),"%I %p" )
+      plot_ly(hourlyloss, x = hourlyloss$hr, y = hourlyloss$hrloss, type = 'bar', name = "Loss", color= hourlyloss$loss, name = hourlyloss$loss,colors = 'Reds',
+              legendgroup = ~hourlyloss$loss,
+              hoverinfo = 'text',
+              text = ~paste(hourlyloss$hr,
+                            '<br> Number of Tornadoes: ', hourlyloss$hrloss,
+                            '<br> Loss Category: ', hourlyloss$loss)) %>%
+        layout(xaxis = list(title = "Hour", dtick=1, tickangle=45, categoryorder = "array",
+                            categoryarray = c("01 AM", "02 AM", "03 AM", "04 AM", "05 AM", "06 AM","07 AM", "08 AM", "09 AM", "10 AM", "11 AM", "12 PM", 
+                                              "01 PM", "02 PM", "03 PM", "04 PM", "05 PM", "06 PM","07 PM", "08 PM", "09 PM", "10 PM", "11 PM", "12 AM")),
+               yaxis = list(title = "Tornadoes Per Hour"),
+               title = "",
+               margin = list(b = 100),
+               barmode = 'stack')
+    }
+    else{
+      dynamic_bar_graph_stacked(hourlyloss, hourlyloss$hr, hourlyloss$hrloss, hourlyloss$loss,
                               "Loss", "Hour", "Tornadoes Per Hour", "", "Hour")   
+    }
   })
   
   
