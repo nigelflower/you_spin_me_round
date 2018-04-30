@@ -566,10 +566,10 @@ ui <- dashboardPage(skin="black",
                             
                             tabItem(tabName="CompareStates",
                                     column(3,
-                                           box(width = 12,
+                                           box(width = 12, height = 1000,
                                                div(dataTableOutput("stateTable0"), style = "font-size:200%")
                                                ),
-                                           box(width = 12,
+                                           box(width = 12, height = 1000,
                                                div(dataTableOutput("stateTable1"), style = "font-size:200%")
                                                )
                                     ),
@@ -834,13 +834,13 @@ server <- function(input, output, session){
   output$stateTable0 <- renderDataTable({
     dataset <- reactiveData0()
     as.data.frame(dataset[,c(5,6,11,12,13,14,20,21)])
-  },options = list(searching = FALSE,lengthChange = FALSE)
+  },options = list(searching = FALSE,lengthChange = FALSE, pageLength = 15)
   )
   
   output$stateTable1 <- renderDataTable({
     dataset <- reactiveData1()
     as.data.frame(dataset[,c(5,6,11,12,13,14,20,21)])
-  },options = list(searching = FALSE,lengthChange = FALSE)
+  },options = list(searching = FALSE,lengthChange = FALSE, pageLength = 15)
   )
   
   output$stateChart0 <- renderPlotly({
