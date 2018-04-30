@@ -527,10 +527,10 @@ ui <- dashboardPage(skin="black",
                             tabItem(tabName="CompareStates",
                                     column(3,
                                            box(width = 12,
-                                               dataTableOutput("stateTable0")
+                                               div(dataTableOutput("stateTable0"), style = "font-size:200%")
                                                ),
                                            box(width = 12,
-                                               dataTableOutput("stateTable1")
+                                               div(dataTableOutput("stateTable1"), style = "font-size:200%")
                                                )
                                     ),
                                     column(4,
@@ -542,6 +542,7 @@ ui <- dashboardPage(skin="black",
                                            )
                                     ),
                                     column(3,
+                                           div(
                                            box(width = 12, height = 1000,
                                                selectInput(inputId = "SelectState0", label = "State", choices = state.abb, selected = "IL"),
                                                uiOutput("reset0"),
@@ -552,9 +553,11 @@ ui <- dashboardPage(skin="black",
                                                uiOutput("reset1"),
                                                leafletOutput("Leaf1",height = 800)
                                            )
+                                           ,style = "font-size:200%"
+                                           )
                                     ),
-                                    
                                     column(2,
+                                           div(
                                            sliderInput(inputId = "compYear", label = "Year", min = 1950, max = 2016, value = 0, step = 1, animate = TRUE, sep = ""),
                                            sliderInput(inputId = 'compMonth', label = "Month(s)", min = 1, max = 12, value = c(1,12), step = 1, animate = TRUE, sep = ""),
                                            selectInput(inputId = "MapSelect", label="Select Map Type", choices = provider_tiles, selected="Stamen Toner"),
@@ -571,7 +574,7 @@ ui <- dashboardPage(skin="black",
                                            sliderInput("compLength", "Filter By Length (miles)", min = 0, max = 235, value = c(0,235)),
                                            sliderInput("compInj", "Filter By Injuries", min = 0, max = 1740, value = c(0,1740)),
                                            sliderInput("compLoss", "Filter By Losses ($)", min = 0, max = 22000000, value = c(0,22000000), pre = "$", sep = "," )
-                                           
+                                           ,style = "font-size:200%")
                                     )
                             ),
                             
@@ -727,16 +730,16 @@ server <- function(input, output, session){
     dataset <- subset(dataset, st == input$SelectState0)
     dataset <- subset(dataset)
     as.data.frame(dataset[,c(5,6,11,12,13,14,20,21)])
-    
-              
-  },options = list(searching = FALSE,lengthChaneg = FALSE))
+  },options = list(searching = FALSE,lengthChange = FALSE)
+  )
   
   output$stateTable1 <- renderDataTable({
     dataset <- reactiveData()
     dataset <- subset(dataset, st == input$SelectState1)
     dataset <- subset(dataset)
     as.data.frame(dataset[,c(5,6,11,12,13,14,20,21)])
-  })
+  },options = list(searching = FALSE,lengthChange = FALSE)
+  )
   
   
   output$Leaf0 <- renderLeaflet({
@@ -825,7 +828,7 @@ server <- function(input, output, session){
       setView(map, 
               lng = state1()[,"x"], 
               lat = state1()[,"y"], 
-              zoom = 6) 
+              zoom = 7) 
     for(i in 1:nrow(dataset)){
       map <- addPolylines(map, lat = as.numeric(dataset[i,c('slat','elat')]),lng = as.numeric(dataset[i,c('slon','elon')]), 
                           weight = 3*(as.numeric(dataset[i,'mag'])+1)
