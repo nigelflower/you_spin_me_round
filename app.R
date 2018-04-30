@@ -626,11 +626,11 @@ ui <- dashboardPage(skin="black",
                                     fluidRow(
                                         box(title="Heatmap of Illinois Tornadoes Starting Point",
                                             selectInput(inputId="HeatmapState0", label="Select State", choices=state.abb, selected="IL"),
-                                            leafletOutput("heatmap0"), width=6),
+                                            leafletOutput("heatmap0", height = "1500px"), width=6),
                                         
                                         box(title="Heatmap of Illinois Tornadoes Ending Point",
                                             selectInput(inputId="HeatmapState1", label="Select State", choices=state.abb, selected="IL"),
-                                            leafletOutput("heatmap1"), width=6)
+                                            leafletOutput("heatmap1", height = "1500px"), width=6)
                                     )
                             )
                         )
