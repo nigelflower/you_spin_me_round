@@ -848,6 +848,7 @@ server <- function(input, output, session){
     dataset <- reactiveData0()
     as.data.frame(dataset[,c(11,12,13,14,20,21)]) %>%
     plot_ly(height = 900) %>%
+      layout(font = list(size = 32)) %>%
       add_trace(type = 'parcoords',
                 line = list(color = "blue",
                             colorscale = 'Jet',
@@ -875,6 +876,7 @@ server <- function(input, output, session){
     dataset <- reactiveData1()
     as.data.frame(dataset[,c(11,12,13,14,20,21)]) %>%
       plot_ly(height = 900) %>%
+      layout(font = list(size = 32)) %>%
       add_trace(type = 'parcoords',
                 line = list(color = "blue",
                             colorscale = 'Jet',
