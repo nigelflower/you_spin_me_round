@@ -406,7 +406,6 @@ ui <- dashboardPage(skin="black",
                                     column(4,
                                            box(title="Percentage of Magnitudes by Year",
                                                plotOutput("year_magnitude_percentage", height="80vh"), width=12)
-                                           
                                     )
                             ),
                             
@@ -650,7 +649,7 @@ states[state.abb == "HI",][4] <- 19.8968
 server <- function(input, output, session){
   
     output$year_table <- renderDataTable({
-        data.frame(table(tornadoes$yr, tornadoes$mag))
+        datatable(data.frame(table(tornadoes$yr, tornadoes$mag)), options = list(pageLength = 50))
     })
     
     
@@ -674,7 +673,7 @@ server <- function(input, output, session){
   })
   
   output$month_table <- renderDataTable(
-      data.frame(table(tornadoes$mo, tornadoes$mag))
+      datatable(data.frame(table(tornadoes$mo, tornadoes$mag)), options = list(pageLength = 50))
   )
   
   
@@ -700,7 +699,7 @@ server <- function(input, output, session){
   
   
   output$hour_table <- renderDataTable(
-      hour_mag <- data.frame(table(hours, tornadoes$mag))
+      datatable(hour_mag <- data.frame(table(hours, tornadoes$mag)), options = list(pageLength = 50))
   )
   
   
@@ -727,7 +726,7 @@ server <- function(input, output, session){
   
   
   output$distance_table <- renderDataTable(
-      subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])
+      datatable(subset(tornadoes, len >= input$slider[1] & len <= input$slider[2]), options = list(pageLength = 50))
   )
   
   
