@@ -385,19 +385,19 @@ ui <- dashboardPage(skin="black",
                                     # Render the Datatable
                                     column(4,
                                            box(title="Datatable", 
-                                               dataTableOutput("year_table"), width=12)
+                                               dataTableOutput("year_table"), width=12, height="1000px")
                                     ),
                                     
                                     # Render the magnitudes by year
                                     column(4,
                                            box(title="Tornado Magnitudes by Year",
-                                               plotOutput("year_magnitude"), width=12)
+                                               plotOutput("year_magnitude"), width=12, height="1000px")
                                     ),
                                     
                                     # Render the percentages of magnitudes by year
                                     column(4,
                                            box(title="Percentage of Magnitudes by Year",
-                                               plotOutput("year_magnitude_percentage"), width=12)
+                                               plotOutput("year_magnitude_percentage"), width=12, height="1000px")
                                            
                                     )
                             ),
@@ -407,20 +407,20 @@ ui <- dashboardPage(skin="black",
                                     # Render data table
                                     column(4,
                                         box(title="Datatable",
-                                            dataTableOutput("month_table"), width=12)
+                                            dataTableOutput("month_table"), width=12, height="1000px")
                                     ),
                                     
                                     # Render magnitudes by month
                                     column(4,
                                        box(title="Tornado Magnitudes by Month",
-                                           plotOutput("month_magnitude"), width=12)
+                                           plotOutput("month_magnitude"), width=12, height="1000px")
                                            
                                     ),
                                     
                                     # Render percentages of magnitudes by month
                                     column(4,
                                        box(title="Percentage of Magnitudes by Month",
-                                           plotOutput("month_magnitude_percentage"), width=12)
+                                           plotOutput("month_magnitude_percentage"), width=12, height="1000px")
                                     )
                             ),
                             
@@ -434,17 +434,17 @@ ui <- dashboardPage(skin="black",
                                     
                                     column(4,
                                         box(title="Datatable",
-                                            dataTableOutput("hour_table"), width=12)
+                                            dataTableOutput("hour_table"), width=12, height="800px")
                                     ),
                                          
                                     column(4,
                                         box(title="Tornado Magnitudes by Hour",
-                                           plotOutput("hour_magnitude"), width=12)
+                                           plotOutput("hour_magnitude"), width=12, height="800px")
                                     ),
                                     
                                     column(4,
                                         box(title="Percentage of Magnitudes by Hour",
-                                           plotOutput("hour_magnitude_percentage"), width=12)
+                                           plotOutput("hour_magnitude_percentage"), width=12, height="800px")
                                     )
                             ),
                             
@@ -458,18 +458,18 @@ ui <- dashboardPage(skin="black",
                                     
                                     column(4,
                                         box(title="Datatable", 
-                                            dataTableOutput("distance_table"), width=12)       
+                                            dataTableOutput("distance_table"), width=12, height="800px")       
                                     ),
                                     
                                     column(4,
                                        box(title="Percentage of Magnitudes by Distance",
-                                           plotOutput("distance_magnitude"), width=12)
+                                           plotOutput("distance_magnitude"), width=12, height="800px")
                                        
                                     ),
                                     
                                     column(4,
                                        box(title="Percentage of Magnitudes by Distance",
-                                           plotOutput("distance_magnitude_percentage"), width=12)
+                                           plotOutput("distance_magnitude_percentage"), width=12, height="800px")
                                        
                                     )
                             ),
