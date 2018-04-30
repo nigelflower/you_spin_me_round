@@ -379,10 +379,14 @@ ui <- dashboardPage(skin="black",
                         tabItems(
                             tabItem(tabName = "About",
                                     h1(style = "font-size: 300%","Project 3: You Spin me Round"),
-                                    h4(style = "font-size: 100%","by: Daria Azhari, Nigel Flower, Jason Guo,  Ryan Nishimoto"),
+                                    h4(style = "font-size: 100%","by: Dania Azhari, Nigel Flower, Jason Guo,  Ryan Nishimoto"),
                                     h4(style = "font-size: 150%",a(href = "https://sites.google.com/uic.edu/nishimo1/cs424/project03", "Project Website")),
                                     h2(style = "font-size: 200%","CS 424: Visualization and Visual Analytics"),
-                                    h4(style = "font-size: 150%",a(href = "https://www.evl.uic.edu/aej/424/", "Course website"))
+                                    h4(style = "font-size: 150%",a(href = "https://www.evl.uic.edu/aej/424/", "Course website")),
+                                    h5(style = "font-size: 100%", "Libraries Used: library(leaflet), library(ggplot2), library(lubridate),
+                                       library(shiny), library(shinydashboard), library(maps), library(reshape2), library(DT), library(scales), 
+                                       library(plyr), library(maps), library(plotly), library(RColorBrewer)")
+                                    
                             ),
                             
                             tabItem(tabName="Year",
@@ -490,12 +494,12 @@ ui <- dashboardPage(skin="black",
                                     ),
                                     fluidRow(
                                       box(title="Tornado Injuries and Fatalities Per Hour",
-                                          plotlyOutput("hourInjFatPlot"), width=12)
+                                          plotlyOutput("hourInjFatPlot", height = "700px"), width=12)
                                     ),
                                     
                                     fluidRow(
                                       box(title="Tornado Monetary Loss Range Per Hour",
-                                          plotlyOutput("hourLossPlot"), width=12)
+                                          plotlyOutput("hourLossPlot", height = "700px"), width=12)
                                     )
                                     
                             ),
