@@ -570,13 +570,6 @@ ui <- dashboardPage(skin="black",
                             ),
                             tabItem(tabName="Illinois",
                                     div(
-                                    column(4,
-                                       fluidRow(
-                                           box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
-                                               dataTableOutput("countyTable", height="90vh"))
-                                       )
-                                    ),
-                                    
                                     column(6,
                                        fluidRow(
                                            box(title = "Tornado Counties Graph", solidHeader = TRUE, status = "primary", width = 12,
@@ -593,6 +586,10 @@ ui <- dashboardPage(skin="black",
                                            )
                                        )
                                     ),
+                                    fluidRow(
+                                      box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
+                                          dataTableOutput("countyTable"))
+                                    ),
                                            
                                            fluidRow(
                                              tabBox(
@@ -602,8 +599,7 @@ ui <- dashboardPage(skin="black",
                                                   tabPanel("Top 10 by Injury", dataTableOutput("injuryTable"))
                                               )
                                            )
-                                     #   )
-                                    #,style = "font-size:100%"
+                                    ,style = "font-size:300%"
                                     )
                             ),
                             
@@ -1110,7 +1106,7 @@ server <- function(input, output, session){
   
   output$countyTable <- renderDataTable({
     datatable(countyInfo, 
-              options = list(searching = FALSE, pageLength = 8, lengthChange = FALSE))
+              options = list(searching = FALSE, pageLength = 10, lengthChange = FALSE))
   })
   
   
@@ -1122,17 +1118,17 @@ server <- function(input, output, session){
   
   output$magTable <- renderDataTable({
     datatable(countyInfo, 
-              options = list(searching = FALSE, pageLength = 8, lengthChange = FALSE))
+              options = list(searching = FALSE, pageLength = 10, lengthChange = FALSE))
   })
   
   output$fatalTable <- renderDataTable({
     datatable(countyInfo, 
-              options = list(searching = FALSE, pageLength = 8, lengthChange = FALSE))
+              options = list(searching = FALSE, pageLength = 10, lengthChange = FALSE))
   })
   
   output$injuryTable <- renderDataTable({
     datatable(countyInfo, 
-              options = list(searching = FALSE, pageLength = 8, lengthChange = FALSE))
+              options = list(searching = FALSE, pageLength = 10, lengthChange = FALSE))
   })
   
   
