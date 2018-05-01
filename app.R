@@ -710,7 +710,7 @@ states[state.abb == "HI",][4] <- 19.8968
 server <- function(input, output, session){
   
     output$year_table <- renderDataTable({
-        datatable(data.frame(table(tornadoes$yr, tornadoes$mag)), options = list(pageLength = 50))
+        datatable(data.frame(table(tornadoes$yr, tornadoes$mag)), options = list(pageLength = 21))
     })
     
     
@@ -734,7 +734,7 @@ server <- function(input, output, session){
   })
   
   output$month_table <- renderDataTable(
-      datatable(data.frame(table(tornadoes$mo, tornadoes$mag)), options = list(pageLength = 50))
+      datatable(data.frame(table(tornadoes$mo, tornadoes$mag)), options = list(pageLength = 21))
   )
   
   
@@ -760,7 +760,7 @@ server <- function(input, output, session){
   
   
   output$hour_table <- renderDataTable(
-      datatable(hour_mag <- data.frame(table(hours, tornadoes$mag)), options = list(pageLength = 50))
+      datatable(hour_mag <- data.frame(table(hours, tornadoes$mag)), options = list(pageLength = 21))
   )
   
   
@@ -787,7 +787,7 @@ server <- function(input, output, session){
   
   
   output$distance_table <- renderDataTable(
-      datatable(subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])[, c("date", "time", "st", "mag")], options = list(pageLength = 50))
+      datatable(subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])[, c("date", "time", "st", "mag")], options = list(pageLength = 21))
   )
   
   
