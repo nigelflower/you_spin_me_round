@@ -506,7 +506,7 @@ ui <- dashboardPage(skin="black",
                                       box(title="Tornado Monetary Loss Range Per Year",
                                           plotlyOutput("yearLossPlot", height = "700px"), width=12)
                                     )
-                                    ,style = "font-size:300%"
+                                    ,style = "font-size:200%"
                                     )
                                     
                             ),
@@ -527,7 +527,7 @@ ui <- dashboardPage(skin="black",
                                       box(title="Tornado Monetary Loss Range Per Month",
                                           plotlyOutput("monthLossPlot", height = "700px"), width=12)
                                     )
-                                    ,style = "font-size:300%"
+                                    ,style = "font-size:200%"
                                     )
                                     
                             ),
@@ -551,7 +551,7 @@ ui <- dashboardPage(skin="black",
                                       box(title="Tornado Monetary Loss Range Per Hour",
                                           plotlyOutput("hourLossPlot", height = "700px"), width=12)
                                     )
-                                    ,style = "font-size:300%"
+                                    ,style = "font-size:200%"
                                     )
                                     
                             ),
@@ -565,7 +565,7 @@ ui <- dashboardPage(skin="black",
                                       box(title="Illinois Loss Per County",
                                           plotlyOutput("lossCountyPlot", height = "90vh"), width=4)
                                     )
-                                    ,style = "font-size:300%"
+                                    ,style = "font-size:200%"
                                     )
                             ),
                             tabItem(tabName="Illinois",
