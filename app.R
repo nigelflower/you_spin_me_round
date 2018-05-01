@@ -573,7 +573,7 @@ ui <- dashboardPage(skin="black",
                                     column(6,
                                        fluidRow(
                                            box(title = "Tornado Counties Graph", solidHeader = TRUE, status = "primary", width = 12,
-                                               plotOutput("countyChart", height="90vh"))
+                                               plotOutput("countyChart", height="40vh"))
                                        )
                                     ),
                                     
@@ -582,13 +582,15 @@ ui <- dashboardPage(skin="black",
                                            box(title = "Illinois 10 Most Powerful/Destructive tornadoes", solidHeader = TRUE, status = "primary", width = 12,
                                                selectInput("top10", "Choose to view by criteria:", choices = c('Magnitude'='1','Fatality'='2', 'Injury' = '3'), selected = 'Magnitude'),
                                                uiOutput("reset2"),
-                                               leafletOutput("Leaf10Most", height="90vh")
+                                               leafletOutput("Leaf10Most", height="40vh")
                                            )
                                        )
                                     ),
                                     fluidRow(
-                                      box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 6,
-                                          dataTableOutput("countyTable"))
+                                      
+                                      box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
+                                          dataTableOutput("countyTable", height="20vh"))
+
                                     ),
                                            
                                            fluidRow(
@@ -596,7 +598,8 @@ ui <- dashboardPage(skin="black",
                                                   title = NULL,  width = 6,
                                                   tabPanel("Top 10 by Magnitude", dataTableOutput("magTable")),
                                                   tabPanel("Top 10 by Fatality", dataTableOutput("fatalTable")),
-                                                  tabPanel("Top 10 by Injury", dataTableOutput("injuryTable"))
+                                                  tabPanel("Top 10 by Injury", dataTableOutput("injuryTable")),
+                                                  height="20vh"
                                               )
                                            )
                                     ,style = "font-size:300%"
