@@ -587,13 +587,13 @@ ui <- dashboardPage(skin="black",
                                        )
                                     ),
                                     fluidRow(
-                                      box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
+                                      box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 6,
                                           dataTableOutput("countyTable"))
                                     ),
                                            
                                            fluidRow(
                                              tabBox(
-                                                  title = NULL,  width = 12,
+                                                  title = NULL,  width = 6,
                                                   tabPanel("Top 10 by Magnitude", dataTableOutput("magTable")),
                                                   tabPanel("Top 10 by Fatality", dataTableOutput("fatalTable")),
                                                   tabPanel("Top 10 by Injury", dataTableOutput("injuryTable"))
@@ -1117,17 +1117,20 @@ server <- function(input, output, session){
   })
   
   output$magTable <- renderDataTable({
-    datatable(countyInfo, 
+    magTableData <- magnitude_sorted10[, -c(1,2,3,4,7,8,9,10,12,13,14,15,16,17,18,19,22,23,24,25,26,27,28,29)]
+    datatable(magTableData, 
               options = list(searching = FALSE, pageLength = 10, lengthChange = FALSE))
   })
   
   output$fatalTable <- renderDataTable({
-    datatable(countyInfo, 
+    fatalTableData <- fatalities_sorted10[, -c(1,2,3,4,7,8,9,10,12,11,14,15,16,17,18,19,22,23,24,25,26,27,28,29)]
+    datatable(fatalTableData, 
               options = list(searching = FALSE, pageLength = 10, lengthChange = FALSE))
   })
   
   output$injuryTable <- renderDataTable({
-    datatable(countyInfo, 
+    injuryTableData <- injuries_sorted10[, -c(1,2,3,4,7,8,9,10,11,13,14,15,16,17,18,19,22,23,24,25,26,27,28,29)]
+    datatable(injuryTableData, 
               options = list(searching = FALSE, pageLength = 10, lengthChange = FALSE))
   })
   
