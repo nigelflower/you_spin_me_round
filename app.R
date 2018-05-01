@@ -593,7 +593,7 @@ ui <- dashboardPage(skin="black",
 
                                     ),
                                            
-                                           fluidRow(
+                                    fluidRow(
                                              tabBox(
                                                   title = NULL,  width = 6,
                                                   tabPanel("Top 10 by Magnitude", dataTableOutput("magTable")),
