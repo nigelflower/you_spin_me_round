@@ -588,14 +588,14 @@ ui <- dashboardPage(skin="black",
                                     ),
                                     fluidRow(
                                       
-                                      box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 12,
+                                      box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 3,
                                           dataTableOutput("countyTable", height="20vh"))
 
                                     ),
                                            
                                     fluidRow(
                                              tabBox(
-                                                  title = NULL,  width = 6,
+                                                  title = NULL,  width = 9,
                                                   tabPanel("Top 10 by Magnitude", dataTableOutput("magTable")),
                                                   tabPanel("Top 10 by Fatality", dataTableOutput("fatalTable")),
                                                   tabPanel("Top 10 by Injury", dataTableOutput("injuryTable")),
