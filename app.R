@@ -15,7 +15,6 @@ library(RColorBrewer)
 
 tornadoes <- read.csv("tornadoes.csv")
 magnitudes <-c("-9", "0", "1", "2", "3", "4", "5")
-#hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
 hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
 
 # Maybe add in Thunderforest.SpinalMap for fun....
@@ -578,14 +577,14 @@ ui <- dashboardPage(skin="black",
                                        )
                                     ),
                                     
-                                    column(4,
+                                    column(6,
                                        fluidRow(
                                            box(title = "Tornado Counties Graph", solidHeader = TRUE, status = "primary", width = 12,
                                                plotOutput("countyChart", height="90vh"))
                                        )
                                     ),
                                     
-                                    column(4,
+                                    column(6,
                                        fluidRow(
                                            box(title = "Illinois 10 Most Powerful/Destructive tornadoes", solidHeader = TRUE, status = "primary", width = 12,
                                                selectInput("top10", "Choose to view by criteria:", choices = c('Magnitude'='1','Fatality'='2', 'Injury' = '3'), selected = 'Magnitude'),
@@ -594,11 +593,10 @@ ui <- dashboardPage(skin="black",
                                            )
                                        )
                                     ),
-                                    #column(4,
                                            
                                            fluidRow(
                                              tabBox(
-                                                title = NULL,  width = 12,
+                                                  title = NULL,  width = 12,
                                                   tabPanel("Top 10 by Magnitude", dataTableOutput("magTable")),
                                                   tabPanel("Top 10 by Fatality", dataTableOutput("fatalTable")),
                                                   tabPanel("Top 10 by Injury", dataTableOutput("injuryTable"))
@@ -773,23 +771,11 @@ server <- function(input, output, session){
   output$hour_magnitude <- renderPlot({
     # hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
     hour_mag <- data.frame(table(hours, tornadoes$mag))
+    ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
+      theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+      xlab("Hour of Day") + ylab("Total Tornadoes") + 
+      guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
     
-    # If the hour setting is on 24 Hours...
-    if(input$hour_radio == 1){
-        ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
-            theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
-            xlab("Hour of Day") + ylab("Total Tornadoes") + 
-            guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
-        
-    }
-    # If the hour setting is on 12 Hours...
-    else{
-        ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
-            theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
-            xlab("Hour of Day") + ylab("Total Tornadoes") + 
-            guides(fill=guide_legend(title="Magnitude")) +
-            scale_x_discrete(labels=c(paste(0:11,"am"),"12 pm", paste(1:11,"pm"))) 
-    }
   })
   
   output$hour_magnitude_percentage <- renderPlot({
@@ -797,30 +783,10 @@ server <- function(input, output, session){
     hour_mag_per <- data.frame(t(apply(table(hours, tornadoes$mag), 1, function(i) i / sum(i))))
     colnames(hour_mag_per) <- magnitudes
     melted_hmp <- melt(as.matrix(hour_mag_per))
-
     
-    if(input$hour_radio == 1){
-        ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
-            xlab("Hours") + ylab("Percentage of Magnitudes") +
-            theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
-            guides(fill=guide_legend(title="Magnitude")) +
-            scale_x_continuous(limits=c(0,23),
-                               breaks=0:23,
-                               labels=c(0:23)) 
-        
-    }
-    else{
-        ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
-            xlab("Hours") + ylab("Percentage of Magnitudes") +
-            theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
-            guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3") +
-            scale_x_continuous(limits=c(0,23),
-                               breaks=0:23,
-                               labels=c(paste(0:11,"am"),"12 pm", paste(1:11,"pm"))) 
-    }
-     
-    
-    
+    ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
+      xlab("Hours") + ylab("Percentage of Magnitudes") +
+      guides(fill=guide_legend(title="Magnitude")) + scale_color_brewer(palette="Set3")
   })
   
   
@@ -1114,7 +1080,7 @@ server <- function(input, output, session){
       addTiles() %>% 
       
       # Select leaflet provider tiles from user input
-      addProviderTiles(providers$CartoDB.DarkMatter) %>%
+      addProviderTiles(providers$Stamen.TonerLite) %>%
       
       setView(map, 
               lng = state1()[,"x"], 
