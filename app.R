@@ -506,7 +506,7 @@ ui <- dashboardPage(skin="black",
                                       box(title="Tornado Monetary Loss Range Per Year",
                                           plotlyOutput("yearLossPlot", height = "700px"), width=12)
                                     )
-                                    ,style = "font-size:300%"
+                                    ,style = "font-size:150%"
                                     )
                                     
                             ),
@@ -527,7 +527,7 @@ ui <- dashboardPage(skin="black",
                                       box(title="Tornado Monetary Loss Range Per Month",
                                           plotlyOutput("monthLossPlot", height = "700px"), width=12)
                                     )
-                                    ,style = "font-size:300%"
+                                    ,style = "font-size:150%"
                                     )
                                     
                             ),
@@ -551,7 +551,7 @@ ui <- dashboardPage(skin="black",
                                       box(title="Tornado Monetary Loss Range Per Hour",
                                           plotlyOutput("hourLossPlot", height = "700px"), width=12)
                                     )
-                                    ,style = "font-size:300%"
+                                    ,style = "font-size:150%"
                                     )
                                     
                             ),
@@ -565,7 +565,7 @@ ui <- dashboardPage(skin="black",
                                       box(title="Illinois Loss Per County",
                                           plotlyOutput("lossCountyPlot", height = "90vh"), width=4)
                                     )
-                                    ,style = "font-size:300%"
+                                    ,style = "font-size:150%"
                                     )
                             ),
                             tabItem(tabName="Illinois",
@@ -588,10 +588,10 @@ ui <- dashboardPage(skin="black",
                                     ),
                                     fluidRow(
                                       
-                                      box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 3,
+                                      box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 4,
                                           dataTableOutput("countyTable", height="20vh")),
                                       tabBox(
-                                        title = NULL,  width = 9,
+                                        title = NULL,  width = 8,
                                         tabPanel("Top 10 by Magnitude", dataTableOutput("magTable")),
                                         tabPanel("Top 10 by Fatality", dataTableOutput("fatalTable")),
                                         tabPanel("Top 10 by Injury", dataTableOutput("injuryTable")),
