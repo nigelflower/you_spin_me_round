@@ -786,9 +786,27 @@ server <- function(input, output, session){
     colnames(hour_mag_per) <- magnitudes
     melted_hmp <- melt(as.matrix(hour_mag_per))
     
-    ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
-      xlab("Hours") + ylab("Percentage of Magnitudes") +
-      guides(fill=guide_legend(title="Magnitude")) + scale_color_brewer(palette="Set3")
+    if(input$hour_radio == 1){
+        ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
+            theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+            xlab("Hour of Day") + ylab("Total Tornadoes") + 
+            guides(fill=guide_legend(title="Magnitude")) +
+            scale_x_discrete(labels=c(0:23)) 
+    }
+    else{
+        ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
+            xlab("Hours") + ylab("Percentage of Magnitudes") +
+            theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+            guides(fill=guide_legend(title="Magnitude")) +
+            scale_x_continuous(limits=c(0,24),
+                               breaks=0:23,
+                               labels=c(paste(0:11,"am"),
+                                        "12 pm",
+                                        paste(1:11,"pm")))
+        
+    }
+    
+    
   })
   
   

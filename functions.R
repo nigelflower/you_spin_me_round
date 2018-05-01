@@ -79,9 +79,7 @@ ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity
     theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
     xlab("Hour of Day") + ylab("Total Tornadoes") + 
     guides(fill=guide_legend(title="Magnitude")) +
-    scale_x_continuous(limits=c(0,23),
-                       breaks=0:23,
-                       labels=c(paste(0:11,"am"),"12 pm", paste(1:11,"pm"))) 
+    scale_x_discrete(labels=c(0:23)) 
 
 
 hour_mag_per <- data.frame(t(apply(table(hours, tornadoes$mag), 1, function(i) i / sum(i))))
@@ -90,13 +88,15 @@ melted_hmp <- melt(as.matrix(hour_mag_per))
 
 ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +
     xlab("Hours") + ylab("Percentage of Magnitudes") +
+    theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
     guides(fill=guide_legend(title="Magnitude")) +
     scale_x_continuous(limits=c(0,24),
-                       breaks=0:12*2,
-                       labels=c(paste(0:5*2,"am"),
+                       breaks=0:23,
+                       labels=c(paste(0:11,"am"),
                                 "12 pm",
-                                paste(7:11*2-12,"pm"), 
-                                "0 am")) 
+                                paste(1:11,"pm"))) 
+
+
 
 
 
