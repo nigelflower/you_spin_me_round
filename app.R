@@ -1103,7 +1103,7 @@ server <- function(input, output, session){
       addTiles() %>% 
       
       # Select leaflet provider tiles from user input
-      addProviderTiles(providers$Stamen.TonerLite) %>%
+      addProviderTiles(providers$CartoDB.DarkMatter) %>%
       
       setView(map, 
               lng = state1()[,"x"], 
