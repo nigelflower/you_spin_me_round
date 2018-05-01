@@ -593,8 +593,19 @@ ui <- dashboardPage(skin="black",
                                                leafletOutput("Leaf10Most", height="90vh")
                                            )
                                        )
-                                    )
-                                    ,style = "font-size:300%"
+                                    ),
+                                    #column(4,
+                                           
+                                           fluidRow(
+                                             tabBox(
+                                                title = NULL,  width = 12,
+                                                  tabPanel("Top 10 by Magnitude", dataTableOutput("magTable")),
+                                                  tabPanel("Top 10 by Fatality", dataTableOutput("fatalTable")),
+                                                  tabPanel("Top 10 by Injury", dataTableOutput("injuryTable"))
+                                              )
+                                           )
+                                     #   )
+                                    #,style = "font-size:100%"
                                     )
                             ),
                             
@@ -1142,6 +1153,23 @@ server <- function(input, output, session){
       geom_bar(position="dodge", stat="identity", fill = "orange") + labs(x="County ", y = "# of Tornadoes") + theme(axis.text.x = element_text(angle = 90, vjust=0.5))
     
   })
+  
+  output$magTable <- renderDataTable({
+    datatable(countyInfo, 
+              options = list(searching = FALSE, pageLength = 8, lengthChange = FALSE))
+  })
+  
+  output$fatalTable <- renderDataTable({
+    datatable(countyInfo, 
+              options = list(searching = FALSE, pageLength = 8, lengthChange = FALSE))
+  })
+  
+  output$injuryTable <- renderDataTable({
+    datatable(countyInfo, 
+              options = list(searching = FALSE, pageLength = 8, lengthChange = FALSE))
+  })
+  
+  
   
   
   #Dania's output
