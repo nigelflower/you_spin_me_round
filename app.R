@@ -570,14 +570,14 @@ ui <- dashboardPage(skin="black",
                             ),
                             tabItem(tabName="Illinois",
                                     div(
-                                    column(6,
+                                    column(8,
                                        fluidRow(
                                            box(title = "Tornado Counties Graph", solidHeader = TRUE, status = "primary", width = 12,
                                                plotOutput("countyChart", height="40vh"))
                                        )
                                     ),
                                     
-                                    column(6,
+                                    column(4,
                                        fluidRow(
                                            box(title = "Illinois 10 Most Powerful/Destructive tornadoes", solidHeader = TRUE, status = "primary", width = 12,
                                                selectInput("top10", "Choose to view by criteria:", choices = c('Magnitude'='1','Fatality'='2', 'Injury' = '3'), selected = 'Magnitude'),
@@ -589,19 +589,16 @@ ui <- dashboardPage(skin="black",
                                     fluidRow(
                                       
                                       box(title = "Tornado County Table", solidHeader = TRUE, status = "primary", width = 3,
-                                          dataTableOutput("countyTable", height="20vh"))
+                                          dataTableOutput("countyTable", height="20vh")),
+                                      tabBox(
+                                        title = NULL,  width = 9,
+                                        tabPanel("Top 10 by Magnitude", dataTableOutput("magTable")),
+                                        tabPanel("Top 10 by Fatality", dataTableOutput("fatalTable")),
+                                        tabPanel("Top 10 by Injury", dataTableOutput("injuryTable")),
+                                        height="20vh"
+                                      )
 
-                                    ),
-                                           
-                                    fluidRow(
-                                             tabBox(
-                                                  title = NULL,  width = 9,
-                                                  tabPanel("Top 10 by Magnitude", dataTableOutput("magTable")),
-                                                  tabPanel("Top 10 by Fatality", dataTableOutput("fatalTable")),
-                                                  tabPanel("Top 10 by Injury", dataTableOutput("injuryTable")),
-                                                  height="20vh"
-                                              )
-                                           )
+                                    )
                                     ,style = "font-size:300%"
                                     )
                             ),
@@ -1007,6 +1004,7 @@ server <- function(input, output, session){
     #addMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end")
     for(i in 1:nrow(dataset)){
       map <- addPolylines(map, lat = as.numeric(dataset[i,c('slat','elat')]),lng = as.numeric(dataset[i,c('slon','elon')]),
+                          weight = 3*(as.numeric(dataset[i,'loss'])+1),
                           opacity = .2*((as.numeric(dataset[i,'mag'])+1))
       )
       
@@ -1053,7 +1051,8 @@ server <- function(input, output, session){
     
       for(i in 1:nrow(dataset)){
         map <- addPolylines(map, lat = as.numeric(dataset[i,c('slat','elat')]),lng = as.numeric(dataset[i,c('slon','elon')]), 
-                          weight = 3*(as.numeric(dataset[i,'mag'])+1)
+                          weight = 3*(as.numeric(dataset[i,'loss'])+1),
+                          opacity = .2*((as.numeric(dataset[i,'mag'])+1))
         )
       }
     #map <- addCircleMarkers(map, lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 5, color = 'red') %>%
@@ -1084,7 +1083,7 @@ server <- function(input, output, session){
       setView(map, 
               lng = state1()[,"x"], 
               lat = state1()[,"y"], 
-              zoom = 9) %>%
+              zoom = 7) %>%
       addCircleMarkers(lng = dataset[,"slon"], lat = dataset[,"slat"], popup = "start", radius = 10, color = 'yellow') %>%
       addCircleMarkers(lng = dataset[,"elon"], lat = dataset[,"elat"], popup = "end", radius = 10, color = 'yellow')
     dataset <- subset(dataset,  elat != 0.00 & elon != 0.00)
