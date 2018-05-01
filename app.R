@@ -790,7 +790,7 @@ server <- function(input, output, session){
   
   
   output$distance_table <- renderDataTable(
-      datatable(subset(tornadoes, len >= input$slider[1] & len <= input$slider[2]), options = list(pageLength = 50))
+      datatable(subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])[, c("date", "time", "st", "mag")], options = list(pageLength = 50))
   )
   
   
