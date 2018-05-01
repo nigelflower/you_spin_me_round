@@ -772,11 +772,27 @@ server <- function(input, output, session){
   
   output$hour_magnitude <- renderPlot({
     # hours <- hour(strptime(tornadoes$time, "%H:%M:%S"))
+      
+     
+      
     hour_mag <- data.frame(table(hours, tornadoes$mag))
-    ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
-      theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
-      xlab("Hour of Day") + ylab("Total Tornadoes") + 
-      guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
+    
+    if(input$hour_radio==1){
+        ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
+            theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+            xlab("Hour of Day") + ylab("Total Tornadoes") + 
+            guides(fill=guide_legend(title="Magnitude")) + scale_fill_brewer(palette="Set3")
+    }
+    
+    else{
+        ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
+            theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
+            xlab("Hour of Day") + ylab("Total Tornadoes") + 
+            guides(fill=guide_legend(title="Magnitude")) +
+            scale_x_discrete(labels=c(paste(0:11,"am"),"12 pm",paste(1:11,"pm")))
+        
+    }
+    
     
   })
   
@@ -790,8 +806,7 @@ server <- function(input, output, session){
         ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity") +
             theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
             xlab("Hour of Day") + ylab("Total Tornadoes") + 
-            guides(fill=guide_legend(title="Magnitude")) +
-            scale_x_discrete(labels=c(0:23)) 
+            guides(fill=guide_legend(title="Magnitude")) 
     }
     else{
         ggplot(data=melted_hmp, aes(x=Var1, y=value, color=factor(Var2))) + geom_line(size=3) +

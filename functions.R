@@ -79,7 +79,7 @@ ggplot(data=hour_mag, aes(x=hours, y=Freq, fill=Var2)) + geom_bar(stat="identity
     theme(axis.text.x = element_text(angle = 55, hjust = 1)) + 
     xlab("Hour of Day") + ylab("Total Tornadoes") + 
     guides(fill=guide_legend(title="Magnitude")) +
-    scale_x_discrete(labels=c(0:23)) 
+    scale_x_discrete(labels=c(paste(0:11,"am"),"12 pm",paste(1:11,"pm")))
 
 
 hour_mag_per <- data.frame(t(apply(table(hours, tornadoes$mag), 1, function(i) i / sum(i))))
