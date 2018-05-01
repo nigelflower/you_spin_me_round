@@ -506,7 +506,7 @@ ui <- dashboardPage(skin="black",
                                       box(title="Tornado Monetary Loss Range Per Year",
                                           plotlyOutput("yearLossPlot", height = "700px"), width=12)
                                     )
-                                    ,style = "font-size:150%"
+                                    ,style = "font-size:100%"
                                     )
                                     
                             ),
@@ -527,7 +527,7 @@ ui <- dashboardPage(skin="black",
                                       box(title="Tornado Monetary Loss Range Per Month",
                                           plotlyOutput("monthLossPlot", height = "700px"), width=12)
                                     )
-                                    ,style = "font-size:150%"
+                                    ,style = "font-size:100%"
                                     )
                                     
                             ),
@@ -551,7 +551,7 @@ ui <- dashboardPage(skin="black",
                                       box(title="Tornado Monetary Loss Range Per Hour",
                                           plotlyOutput("hourLossPlot", height = "700px"), width=12)
                                     )
-                                    ,style = "font-size:150%"
+                                    ,style = "font-size:100%"
                                     )
                                     
                             ),
@@ -565,7 +565,7 @@ ui <- dashboardPage(skin="black",
                                       box(title="Illinois Loss Per County",
                                           plotlyOutput("lossCountyPlot", height = "90vh"), width=4)
                                     )
-                                    ,style = "font-size:150%"
+                                    ,style = "font-size:100%"
                                     )
                             ),
                             tabItem(tabName="Illinois",
@@ -712,7 +712,7 @@ server <- function(input, output, session){
     output$year_table <- renderDataTable({
         dt <- data.frame(table(tornadoes$yr, tornadoes$mag))
         colnames(dt) <- c("Year", "Magnitude", "Frequency")
-        datatable(dt, options = list(pageLength = 21))
+        datatable(dt, options = list(pageLength = 20))
     })
     
     
@@ -738,7 +738,7 @@ server <- function(input, output, session){
   output$month_table <- renderDataTable({
         dt <- data.frame(table(tornadoes$mo, tornadoes$mag))
         colnames(dt) <- c("Month", "Magnitude", "Frequency")
-        datatable(dt, options = list(pageLength = 21))
+        datatable(dt, options = list(pageLength = 20))
   })
   
   
@@ -766,7 +766,7 @@ server <- function(input, output, session){
   output$hour_table <- renderDataTable({
       dt <- data.frame(table(hours, tornadoes$mag))
       colnames(dt) <- c("Hours", "Magnitude", "Frequency")
-      datatable(dt, options = list(pageLength = 21))
+      datatable(dt, options = list(pageLength = 20))
   })
   
   
@@ -793,7 +793,7 @@ server <- function(input, output, session){
   
   
   output$distance_table <- renderDataTable(
-      datatable(subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])[, c("date", "time", "st", "mag")], options = list(pageLength = 21))
+      datatable(subset(tornadoes, len >= input$slider[1] & len <= input$slider[2])[, c("date", "time", "st", "mag")], options = list(pageLength = 20))
   )
   
   
